@@ -5,33 +5,35 @@
 
 /* global variables declarations */
 
-// hidden weigths
-double w11;
-double w12;
-double w21;
-double w22;
+// Number of Nodes
+#define numInputs 2
+#define numHiddens 3
+#define numOutputs 1
 
-// output weigths
-double o1;
-double o2;
+// Nodes
+double hiddenLayer[numHiddens];
+double outputLayer[numOutputs];
 	
-// hidden and output biases
-double h1b;
-double h2b;
-double ob;
-	
+// Biases
+double hiddenLayerBias[numHiddens];
+double outputLayerBias[numOutputs];
+
+// Weights
+double hiddenWeights[numInputs][numHiddens];
+double outputWeights[numHiddens][numOutputs];
+
 // Training dataset
-char inputs[4][2] = {
+char trainingInputs[4][2] = {
 	{ 0, 0 },
 	{ 1, 0 },
 	{ 0, 1 },
 	{ 1, 1 }
 };
-char outputs[4] = { 0, 1, 1, 0 };
+char trainingOutputs[][1] = { {0}, {1}, {1}, {0} };
 
 
 // random number generator (between 0 and 1)
-double random()
+double randomDbl()
 {
 	return ((double)rand()) / ((double)RAND_MAX);
 }
@@ -52,7 +54,7 @@ double sigmoid_prime(double x)
 
 
 // randomize array
-void shuffle(char s[], size_t n)
+void shuffle(size_t s[], size_t n)
 {
 	for (size_t i = 0; i < n - 1; i++) 
 	{
@@ -65,75 +67,102 @@ void shuffle(char s[], size_t n)
 
 
 // predict output
-double predict(double i1, double i2)
+double *predict(char inputs[])
 {
-	double n1 = w11 * i1 + w21 * i2 + h1b;
-	n1 = sigmoid(n1);
-	double n2 = w12 * i1 + w22 * i2 + h2b;
-	n2 = sigmoid(n2);
-
-	double output = n1 * o1 + n2 * o2 + ob;
-	output = sigmoid(output);
-
-	return output;
+	for (size_t k = 0; k < numHiddens; k++)
+	{	
+		double activation = hiddenLayerBias[k];
+		for (size_t l = 0; l < numInputs; l++)
+			activation += hiddenWeights[l][k] * inputs[l];
+		hiddenLayer[k] = sigmoid(activation);
+	}
+	
+	for (size_t k = 0; k < numOutputs; k++)
+	{	
+		double activation = outputLayerBias[k];
+		for (size_t l = 0; l < numHiddens; l++)
+			activation += outputWeights[l][k] * hiddenLayer[l];
+		outputLayer[k] = sigmoid(activation);
+	}
+	
+	return outputLayer;
 }
 
 
 // train neural network
 void train(long epochs, double lr)
 {
-	for (size_t i = 1; i < epochs + 1; i++)
+	for (long i = 1; i < epochs + 1; i++)
 	{
-		char indexes[4] = { 0, 1, 2, 3 };
+		size_t indexes[4] = { 0, 1, 2, 3 };
 		shuffle(indexes, 4);
 
 		for (size_t j = 0; j < 4; j++)
 		{
 			// get training set and target output
-			double i1 = inputs[indexes[j]][0];
-			double i2 = inputs[indexes[j]][1];
-			double target = outputs[indexes[j]];
-
+			double i1 = trainingInputs[indexes[j]][0];
+			double i2 = trainingInputs[indexes[j]][1];
+			double t = trainingOutputs[indexes[j]][0];
+			double inputs[2] = { i1, i2 };
+			double targets[1] = { t };
 
 			// feed forward
-			double n1 = w11 * i1 + w21 * i2 + h1b;
-			n1 = sigmoid(n1);
-			double n2 = w12 * i1 + w22 * i2 + h2b;
-			n2 = sigmoid(n2);
-
-			double output = n1 * o1 + n2 * o2 + ob;
-			output = sigmoid(output);
+			for (size_t k = 0; k < numHiddens; k++)
+			{	
+				double activation = hiddenLayerBias[k];
+				for (size_t l = 0; l < numInputs; l++)
+					activation += hiddenWeights[l][k] * inputs[l];
+				hiddenLayer[k] = sigmoid(activation);
+			}
+	
+			for (size_t k = 0; k < numOutputs; k++)
+			{	
+				double activation = outputLayerBias[k];
+				for (size_t l = 0; l < numHiddens; l++)
+					activation += outputWeights[l][k] * hiddenLayer[l];
+				outputLayer[k] = sigmoid(activation);
+			}
 
 
 			// backpropagation
-			double error = target - output;
-			double derror = error * sigmoid_prime(output);
+			double derrors[numOutputs];
+			for (size_t k = 0; k < numOutputs; k++)
+				derrors[k] = (targets[k] - outputLayer[k]) * sigmoid_prime(outputLayer[k]);
+			
+			double dhidden[numHiddens];
+			for (size_t k = 0; k < numHiddens; k++)
+			{
+				double error = 0.0f;
+				for (size_t l = 0; l < numOutputs; l++)
+					error += derrors[l] * outputWeights[k][l];
+				dhidden[k] = error * sigmoid_prime(hiddenLayer[k]);
+			}
 
-			double dn1 = derror * o1 * sigmoid_prime(n1);
-			double dn2 = derror * o2 * sigmoid_prime(n2);
-
-			o1 += n1 * derror * lr;
-			o2 += n2 * derror * lr;
-			ob += derror * lr;
-
-			w11 += i1 * dn1 * lr;
-			w21 += i2 * dn1 * lr;
-			h1b += dn1 * lr;
-			w12 += i1 * dn2 * lr;
-			w22 += i2 * dn2 * lr;
-			h2b += dn2 * lr;
+			// Apply change
+			for (size_t k = 0; k < numOutputs; k++)
+			{
+				outputLayerBias[k] += derrors[k] * lr;
+				for (size_t l = 0; l < numHiddens; l++)
+					outputWeights[l][k] += hiddenLayer[l] * derrors[k] * lr;
+			}
+			for (size_t k = 0; k < numHiddens; k++)
+			{
+				hiddenLayerBias[k] += dhidden[k] * lr;
+				for (size_t l = 0; l < numInputs; l++)
+					hiddenWeights[l][k] += inputs[l] * dhidden[k] * lr;
+			}
 		}
 
 		if (i % 1000 == 0)
 		{
-			printf("RESULTS FOR EPOCH %li\n", i);
+			double cost = 0;
 			for (size_t j = 0; j < 4; j++)
 			{
-				double o = predict(inputs[j][0], inputs[j][1]);
-				printf("For input [%hhi, %hhi] expected %hhi, predicted %f\n",
-						inputs[j][0], inputs[j][1], outputs[j], o);
+				double o = predict(trainingInputs[j])[0];
+				cost += (trainingOutputs[j][0] - o) * (trainingOutputs[j][0] - o);
 			}
-			printf("\n");
+			cost = cost / 4;
+			printf("%li means squared error:%f\n", i, cost);
 		}
 	}
 }
@@ -141,24 +170,33 @@ void train(long epochs, double lr)
 
 int main()
 {
-	/* global variables definitions */
-
-	// hidden weigths
-	w11 = random();
-	w12 = random();
-	w21 = random();
-	w22 = random();
-
-	// output weigths
-	o1 = random();
-	o2 = random();
+	/* Variables Definitions */
 	
-	// hidden and output biases
-	h1b = 0;
-	h2b = 0;
-	ob = 0;
+	// Weights
+	for (size_t i = 0; i < numInputs; i++)
+		for (size_t j = 0; j < numHiddens; j++)
+			hiddenWeights[i][j] = randomDbl();
 	
-	train(50000, 0.1f);
+	for (size_t i = 0; i < numInputs; i++)
+		for (size_t j = 0; j < numOutputs; j++)
+			outputWeights[i][j] = randomDbl();
+
+	// Biases
+	for (size_t i = 0; i < numOutputs; i++)
+		outputLayerBias[i] = randomDbl();
+
+	
+	int Epochs = 15000;	
+	double variance = 10.0f;
+	
+	train(Epochs, variance);
+
+	for (size_t j = 0; j < 4; j++)
+	{
+		double o = predict(trainingInputs[j])[0];
+		printf("For input [%hhi, %hhi] expected %hhi, predicted %f\n",
+			trainingInputs[j][0], trainingInputs[j][1], trainingOutputs[j][0], o);
+	}
 
 	return 0;
 }
