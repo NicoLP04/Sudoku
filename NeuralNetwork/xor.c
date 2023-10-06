@@ -4,11 +4,6 @@
 
 /* global variables declarations */
 
-// Number of Nodes
-#define numInputs 2
-#define numHiddens 3
-#define numOutputs 1
-
 // Nodes
 double hiddenLayer[numHiddens];
 double outputLayer[numOutputs];
@@ -24,8 +19,12 @@ double outputWeights[numHiddens][numOutputs];
 
 
 // predict output
-double *predict(char inputs[])
+double *predict(char i1, char i2, char *file)
 {
+	load_xor(file);
+
+	char inputs[2] = { i1, i2 };
+
 	for (size_t k = 0; k < numHiddens; k++)
 	{	
 		double activation = hiddenLayerBias[k];
@@ -47,8 +46,10 @@ double *predict(char inputs[])
 
 
 // train neural network
-void train(long epochs, double lr, char trainingInputs[4][2], char trainingOutputs[1][4])
+void train(long epochs, double lr, char trainingInputs[4][2], char trainingOutputs[4][1], char *file)
 {
+	init_weights();
+
 	for (long i = 1; i < epochs + 1; i++)
 	{
 		size_t indexes[4] = { 0, 1, 2, 3 };
@@ -109,19 +110,9 @@ void train(long epochs, double lr, char trainingInputs[4][2], char trainingOutpu
 					hiddenWeights[l][k] += inputs[l] * dhidden[k] * lr;
 			}
 		}
-
-		if (i % 1000 == 0)
-		{
-			double cost = 0;
-			for (size_t j = 0; j < 4; j++)
-			{
-				double o = predict(trainingInputs[j])[0];
-				cost += (trainingOutputs[j][0] - o) * (trainingOutputs[j][0] - o);
-			}
-			cost = cost / 4;
-			printf("%li means squared error:%f\n", i, cost);
-		}
 	}
+
+	save_xor(file);
 }
 
 // save weights and biases in file

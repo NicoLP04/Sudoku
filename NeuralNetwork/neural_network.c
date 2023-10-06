@@ -1,42 +1,131 @@
+#include <err.h>
+#include <string.h>
+#include <time.h>
 #include "xor.h"
+#include "maths_func.h"
+
+
+void exit_help()
+{
+	char help[] =
+		"Usage:\n"
+		"--predict\n"
+		"--train\n"
+		"--reset\n"
+
+	errx(EXIT_FAILURE, "%s", help);
+}
+
+
+void predict_xor(int argc, char *file, char trainingInputs[4][2], char trainingOutputs[4][1])
+{
+	if (argc > 2)
+		exit_help();
+	
+	for (size_t j = 0; j < 4; j++)
+	{
+		double o = predict(trainingInputs[j][0], trainingInputs[j][1], file)[0];
+		printf("For input [%hhi, %hhi] expected %hhi, predicted %f\n",
+			trainingInputs[j][0], trainingInputs[j][1], trainingOutputs[j][0], o);
+	}
+}
+
+
+void train_xor(int argc, char *file, char trainingInputs[4][2], char trainingOutputs[4][1])
+{
+	if (argc > 2)
+		exit_help();
+	
+	int epochs = 10000;	
+	double variance = 10.0f;
+	
+	train(epochs, variance, trainingInputs, trainingOutputs, file);
+
+	printf("Neural network successfully trained !\n");
+}
+
+
+void reset_xor(int argc, char *file)
+{
+	if (argc > 2)
+		exit_help();
+
+	FILE *f;
+	
+	f = fopen(file,"w");
+
+	if(f == NULL)
+	{
+		printf("Error!");   
+		exit(1);
+	}
+
+	// write number of Nodes I|H|O
+	fprintf(f,"%d|%d|%d\n\n", numInputs, numHiddens, numOutputs);
+   
+	// write biases
+	for (size_t i = 0; i < numHiddens; i++)
+		fprintf(f, "%f|", 0.0f);
+	fprintf(f, "\n");
+	for (size_t i = 0; i < numOutputs; i++)
+		fprintf(f, "%f|", 0.0f);
+	fprintf(f, "\n\n");
+
+	// write weights
+	for (size_t i = 0; i < numHiddens; i++)
+	{
+		for (size_t j = 0; j < numInputs; j++)
+		{
+			double val = randomDbl();
+			fprintf(f, "%f|", val);
+		}
+		fprintf(f, "\n");
+	}
+	fprintf(f, "\n");
+	for (size_t i = 0; i < numOutputs; i++)
+	{
+		for (size_t j = 0; j < numHiddens; j++)
+		{
+			double val = randomDbl();
+			fprintf(f, "%f|", val);
+		}
+		fprintf(f, "\n");
+	}
+
+	fclose(f);
+
+	printf("Neural network successfully reset !\n");
+}
 
 
 // main function
-int main(int argc, char *argv[])
+int main(int argc, char **argv)
 {
-	init_weights();
+	if (argc == 1)
+		exit_help();
+	
+	srand(time(NULL));
 
 	// Training dataset
+	char trainingOutputs[4][1] = { {0}, {1}, {1}, {0} };
 	char trainingInputs[4][2] = {
 		{ 0, 0 },
 		{ 1, 0 },
 		{ 0, 1 },
 		{ 1, 1 }
 	};
-	char trainingOutputs[4][1] = { {0}, {1}, {1}, {0} };
+
+	if (strcmp(argv[1], "--predict") == 0)
+		predict_xor(argc, "values", trainingInputs, trainingOutputs);
+	else if (strcmp(argv[1], "--train") == 0)
+		train_xor(argc, "values", trainingInputs, trainingOutputs);
+	else if (strcmp(argv[1], "--reset") == 0)
+		reset_xor(argc, "values");
+	else
+		exit_help();
 
 
-	
-	int Epochs = 15000;	
-	double variance = 1.5f;
-	
-	printf("BEFORE TRAINING\n");
-	for (size_t j = 0; j < 4; j++)
-	{
-		double o = predict(trainingInputs[j])[0];
-		printf("For input [%hhi, %hhi] expected %hhi, predicted %f\n",
-			trainingInputs[j][0], trainingInputs[j][1], trainingOutputs[j][0], o);
-	}
-	printf("\n");
-	//train(Epochs, variance);
-	load_xor("values");
-	printf("AFTER TRAINING\n");
-	for (size_t j = 0; j < 4; j++)
-	{
-		double o = predict(trainingInputs[j])[0];
-		printf("For input [%hhi, %hhi] expected %hhi, predicted %f\n",
-			trainingInputs[j][0], trainingInputs[j][1], trainingOutputs[j][0], o);
-	}
-	return 0;
+	return EXIT_SUCCESS;
 }
+
 

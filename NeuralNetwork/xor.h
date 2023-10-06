@@ -4,11 +4,17 @@
 #include <stdlib.h>
 
 
+// Number of Nodes
+#define numInputs 2
+#define numHiddens 3
+#define numOutputs 1
+
+
 // predict output based on inputs
-double *predict(char inputs[]);
+double *predict(char i1, char i2, char *file);
 
 // train neural network
-void train(long epochs, double lr, char trainingInputs[4][2], char trainingOutputs[1][4]);
+void train(long epochs, double lr, char trainingInputs[4][2], char trainingOutputs[4][1], char *file);
 
 // save weights and biases to file
 void save_xor(char *file);
