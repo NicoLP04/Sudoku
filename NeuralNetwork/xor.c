@@ -1,6 +1,5 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <math.h>
+#include "xor.h"
+#include "maths_func.h"
 
 
 /* global variables declarations */
@@ -13,7 +12,7 @@
 // Nodes
 double hiddenLayer[numHiddens];
 double outputLayer[numOutputs];
-	
+
 // Biases
 double hiddenLayerBias[numHiddens];
 double outputLayerBias[numOutputs];
@@ -22,48 +21,6 @@ double outputLayerBias[numOutputs];
 double hiddenWeights[numInputs][numHiddens];
 double outputWeights[numHiddens][numOutputs];
 
-// Training dataset
-char trainingInputs[4][2] = {
-	{ 0, 0 },
-	{ 1, 0 },
-	{ 0, 1 },
-	{ 1, 1 }
-};
-char trainingOutputs[][1] = { {0}, {1}, {1}, {0} };
-
-
-// random number generator (between 0 and 1)
-double randomDbl()
-{
-	return ((double)rand()) / ((double)RAND_MAX);
-}
-
-
-// sigmoid function
-double sigmoid(double x)
-{
-	return 1 / (1 + exp(-x));
-}
-
-
-// derivative of sigmoid function
-double sigmoid_prime(double x)
-{
-	return x * (1 - x);
-}
-
-
-// randomize array
-void shuffle(size_t s[], size_t n)
-{
-	for (size_t i = 0; i < n - 1; i++) 
-	{
-		size_t j = i + rand() / (RAND_MAX / (n - i) + 1);
-		char t = s[j];
-		s[j] = s[i];
-		s[i] = t;
-	}
-}
 
 
 // predict output
@@ -90,7 +47,7 @@ double *predict(char inputs[])
 
 
 // train neural network
-void train(long epochs, double lr)
+void train(long epochs, double lr, char trainingInputs[4][2], char trainingOutputs[1][4])
 {
 	for (long i = 1; i < epochs + 1; i++)
 	{
@@ -167,36 +124,103 @@ void train(long epochs, double lr)
 	}
 }
 
-
-int main()
+// save weights and biases in file
+void save_xor(char *file)
 {
-	/* Variables Definitions */
+	FILE *f;
 	
-	// Weights
+	f = fopen(file,"w");
+
+	if(f == NULL)
+	{
+		printf("Error!");   
+		exit(1);
+	}
+
+	// write number of Nodes I|H|O
+	fprintf(f,"%d|%d|%d\n\n", numInputs, numHiddens, numOutputs);
+   
+	// write biases
+	for (size_t i = 0; i < numHiddens; i++)
+		fprintf(f, "%f|", hiddenLayerBias[i]);
+	fprintf(f, "\n");
+	for (size_t i = 0; i < numOutputs; i++)
+		fprintf(f, "%f|", outputLayerBias[i]);
+	fprintf(f, "\n\n");
+
+	// write weights
+	for (size_t i = 0; i < numHiddens; i++)
+	{
+		for (size_t j = 0; j < numInputs; j++)
+			fprintf(f, "%f|", hiddenWeights[j][i]);
+		fprintf(f, "\n");
+	}
+	fprintf(f, "\n");
+	for (size_t i = 0; i < numOutputs; i++)
+	{
+		for (size_t j = 0; j < numHiddens; j++)
+			fprintf(f, "%f|", outputWeights[j][i]);
+		fprintf(f, "\n");
+	}
+
+	fclose(f);
+}
+
+
+// load weights and biases from file
+void load_xor(char *file)
+{
+	FILE *f;
+	
+	double a;
+        f = fopen(file, "r");
+
+	for (size_t k = 0; k < 3; k++)
+		fscanf(f, "%lf|", &a);
+
+	// get hidden biases
+	for (size_t k = 0; k < numHiddens; k++)
+	{
+		fscanf(f, "%lf|", &a);
+		hiddenLayerBias[k] = a;
+	}
+	// get output biases
+	for (size_t k = 0; k < numOutputs; k++)
+	{
+		fscanf(f, "%lf|", &a);
+		outputLayerBias[k] = a;
+	}
+
+	// get weights
+	for (size_t k = 0; k < numHiddens; k++)
+	{
+		for (size_t l = 0; l < numInputs; l++)
+		{
+			fscanf(f, "%lf|", &a);
+			hiddenWeights[l][k] = a;
+		}
+	}
+	for (size_t k = 0; k < numOutputs; k++)
+	{
+		for (size_t l = 0; l < numHiddens; l++)
+		{	
+			fscanf(f, "%lf|", &a);
+			outputWeights[l][k] = a;
+		}
+	}
+
+        fclose(f);
+}
+
+
+// init weights with random values
+void init_weights()
+{
+	// Init Weights
 	for (size_t i = 0; i < numInputs; i++)
 		for (size_t j = 0; j < numHiddens; j++)
 			hiddenWeights[i][j] = randomDbl();
-	
 	for (size_t i = 0; i < numInputs; i++)
 		for (size_t j = 0; j < numOutputs; j++)
 			outputWeights[i][j] = randomDbl();
-
-	// Biases
-	for (size_t i = 0; i < numOutputs; i++)
-		outputLayerBias[i] = randomDbl();
-
-	
-	int Epochs = 15000;	
-	double variance = 10.0f;
-	
-	train(Epochs, variance);
-
-	for (size_t j = 0; j < 4; j++)
-	{
-		double o = predict(trainingInputs[j])[0];
-		printf("For input [%hhi, %hhi] expected %hhi, predicted %f\n",
-			trainingInputs[j][0], trainingInputs[j][1], trainingOutputs[j][0], o);
-	}
-
-	return 0;
 }
