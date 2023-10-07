@@ -7,7 +7,7 @@ CFLAGS = -Wall -Wextra -O3 -g -fsanitize=address
 LDFLAGS = -fsanitize=address
 LDLIBS = -lm
 
-SRC = xor.c maths_func.c neural_network.c
+SRC := $(shell find -name '*.c')
 OBJ = ${SRC:.c=.o}
 DEP = ${SRC:.c=.d}
 

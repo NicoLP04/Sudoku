@@ -1,3 +1,5 @@
+#include <stdlib.h>
+#include <stdio.h>
 #include <err.h>
 #include <string.h>
 #include <time.h>
@@ -11,7 +13,7 @@ void exit_help()
 		"Usage:\n"
 		"--predict\n"
 		"--train\n"
-		"--reset\n"
+		"--reset\n";
 
 	errx(EXIT_FAILURE, "%s", help);
 }
