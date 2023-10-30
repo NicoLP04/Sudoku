@@ -1,4 +1,5 @@
 #include "houghtransform.h"
+#include "pixel.h"
 
 #define THRESHOLD 0.5
 
@@ -110,7 +111,10 @@ void houghtransform(SDL_Surface* image, SDL_Renderer* draw_image)
     {
         for (int x = 0; x < width; x++)
         {
-            if (pixels[x * height + y].r == 255)
+            Uint32 p = get_pixel(image, x, y);
+            SDL_Color rgb;
+            SDL_GetRGB(p, image->format, &rgb.r, &rgb.g, &rgb.b);
+            if (rgb.r == 255)
             {
                 for (int i = 0; i <= arrlen; i++)
                 {

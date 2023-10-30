@@ -1,4 +1,4 @@
-#include <pixel.h>
+#include "pixel.h"
 #include <err.h>
 
 
@@ -10,9 +10,9 @@ static inline Uint8* pixelRef(SDL_Surface* s, unsigned int x, unsigned int y)
 
 Uint32 get_pixel(SDL_Surface* s, unsigned int x, unsigned int y)
 {
-    Uint8* p = pixel_ref(s, x ,y);
+    Uint8* p = pixelRef(s, x ,y);
 
-    switch (surface->format->BytesPerPixel)
+    switch (s->format->BytesPerPixel)
     {
         case 1:
             return *p;
