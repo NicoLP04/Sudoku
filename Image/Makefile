@@ -4,7 +4,7 @@ TARGET = Image
 CC = gcc
 CPPFLAGS = -MMD
 CFLAGS = -Wall -Wextra -O3 -g -fsanitize=address
-LDFLAGS = -fsanitize=adress
+LDFLAGS = -fsanitize=address
 LDLIBS = -lm
 
 
