@@ -10,18 +10,18 @@
 
 
 // allocate memory for a matrix of size x by y
-unsigned int** initMat(unsigned int x, unsigned int y)
+unsigned int** initMat(unsigned int x, unsigned int y);
 
 // convert degrees to radian
-double deg2rad(double degrees)
+double deg2rad(double degrees);
 
 // convert radian to degrees
-double rad2deg(double radian)
+double rad2deg(double radian);
 
 // the houghtransform algorithm
-void houghtransform(SDL_Surface* image, SDL_Renderer* draw_image)
+void houghtransform(SDL_Surface* image, SDL_Renderer* draw_image);
 
 // creates a SDL surface from a path
-SDL_Surface* load_image(const char* path)
+SDL_Surface* load_image(const char* path);
 
 #endif
