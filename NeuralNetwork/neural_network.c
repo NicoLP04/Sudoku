@@ -23,7 +23,7 @@ void predict_xor(int argc, char *file, char trainingInputs[4][2], char trainingO
 {
 	if (argc > 2)
 		exit_help();
-	
+
 	for (size_t j = 0; j < 4; j++)
 	{
 		double o = predict(trainingInputs[j][0], trainingInputs[j][1], file)[0];
@@ -37,10 +37,10 @@ void train_xor(int argc, char *file, char trainingInputs[4][2], char trainingOut
 {
 	if (argc > 2)
 		exit_help();
-	
-	int epochs = 10000;	
+
+	int epochs = 10000;
 	double variance = 10.0f;
-	
+
 	train(epochs, variance, trainingInputs, trainingOutputs, file);
 
 	printf("Neural network successfully trained !\n");
@@ -53,18 +53,18 @@ void reset_xor(int argc, char *file)
 		exit_help();
 
 	FILE *f;
-	
+
 	f = fopen(file,"w");
 
 	if(f == NULL)
 	{
-		printf("Error!");   
+		printf("Error!");
 		exit(1);
 	}
 
 	// write number of Nodes I|H|O
 	fprintf(f,"%d|%d|%d\n\n", numInputs, numHiddens, numOutputs);
-   
+
 	// write biases
 	for (size_t i = 0; i < numHiddens; i++)
 		fprintf(f, "%f|", 0.0f);
@@ -105,7 +105,7 @@ int main(int argc, char **argv)
 {
 	if (argc == 1)
 		exit_help();
-	
+
 	srand(time(NULL));
 
 	// Training dataset

@@ -81,9 +81,9 @@ void print_grid()
 
 
 
-void read_grid(char* fileName) 
+void read_grid(char* fileName)
 {
-	FILE* file = fopen(fileName, "r"); 
+	FILE* file = fopen(fileName, "r");
 
 	if (!file)
 	{
@@ -92,7 +92,7 @@ void read_grid(char* fileName)
 }
 
 	char line[500];
-	
+
 	size_t i = 0;
 	while (fgets(line, sizeof(line), file))
 	{
@@ -101,7 +101,7 @@ void read_grid(char* fileName)
 		size_t j = 0;
 		size_t z = 0;
 		while (line[z] != 0)
-		{	
+		{
 			if (line[z] >= '0' && line[z] <= '9')
 			{
 				s[i][j] = line[z] - '0';
@@ -138,7 +138,7 @@ void write_grid(char* fileName)
 		if ((i+1) % 3 == 0 && i != 8)
 			fputc('\n', file);
         }
-        
+
 	fclose(file);
 }
 
@@ -150,7 +150,7 @@ int main(int argc, char** argv)
 		printf("Error: expected 1 argument, got: %i", argc - 1);
 		return -1;
 	}
-	
+
 	//read any text file from currect directory
 	char* fileName = argv[1];
 	read_grid(fileName);
