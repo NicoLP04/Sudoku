@@ -101,8 +101,6 @@ void houghtransform(SDL_Surface* image, SDL_Renderer* draw_image)
     int rho_index;
     unsigned int max = 0;
 
-    Uint32* pixels = image->pixels;
-
     int err = SDL_LockSurface(image);
     if (err != 0)
         errx(EXIT_FAILURE, "%s", SDL_GetError());
@@ -155,6 +153,10 @@ void houghtransform(SDL_Surface* image, SDL_Renderer* draw_image)
                 increase = 1;
                 continue;
             }
+            else if (val < prev && increase)
+            {
+                increase = 0;
+            }
             else if (val < prev)
             {
                 prev = val;
@@ -179,10 +181,10 @@ void houghtransform(SDL_Surface* image, SDL_Renderer* draw_image)
                 int y = (int)(s * r);
 
                 int x1 = x + (int)(diagonal * (-s));
-                int y1 = x + (int)(diagonal * c);
+                int y1 = y + (int)(diagonal * c);
 
                 int x2 = x - (int)(diagonal * (-s));
-                int y2 = x - (int)(diagonal * c);
+                int y2 = y - (int)(diagonal * c);
 
 
                 SDL_RenderDrawLine(draw_image, x1, y1, x2, y2);
