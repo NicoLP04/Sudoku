@@ -5,17 +5,18 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct Dot
-{
-    int x;
-    int y;
-} Dot;
 
-typedef struct Line
-{
-    int x0;
-    int y0;
-    int x1;
-    int y1;
-    double theta;
-} Line;
+// allocate memory for a matrix of size x by y
+unsigned int** initMat(unsigned int x, unsigned int y)
+
+// convert degrees to radian
+double deg2rad(double degrees)
+
+// convert radian to degrees
+double rad2deg(double radian)
+
+// the houghtransform algorithm
+void houghtransform(SDL_Surface* image, SDL_Renderer* draw_image)
+
+// creates a SDL surface from a path
+SDL_Surface* load_image(const char* path)
