@@ -25,7 +25,7 @@ double sigmoid_prime(double x)
 // randomize array
 void shuffle(size_t s[], size_t n)
 {
-	for (size_t i = 0; i < n - 1; i++) 
+	for (size_t i = 0; i < n - 1; i++)
 	{
 		size_t j = i + rand() / (RAND_MAX / (n - i) + 1);
 		char t = s[j];
