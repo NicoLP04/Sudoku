@@ -1,4 +1,5 @@
 #include "houghtransform.h"
+#include "pixel.h"
 
 #define THRESHOLD 0.5
 
@@ -33,52 +34,7 @@ double rad2deg(double radian)
 }
 
 
-void draw_line(Image *image, int width, int height, Line *line, Pixel *color)
-{
-    int x0 = line->x0;
-    int y0 = line->y0;
-
-    int x1 = line->x1;
-    int y1 = line->y1;
-
-    int dx = abs(x1 - x0);
-    int sx = x0 < x1 ? 1 : -1;
-
-    int dy = abs(y1 - y0);
-    int sy = y0 < y1 ? 1 : -1;
-
-    int err = dx + dy;
-
-    while(1)
-    {
-        if (0 <= x0 && x0 < w && 0 <= y0 && y0 < h)
-        {
-            image->pixels[x0][y0].r = color->r;
-            image->pixels[x0][y0].g = color->g;
-            image->pixels[x0][y0].b = color->b;
-        }
-
-        if (x0 == x1 && y0 == y1)
-            break;
-
-        int error2 = 2 * err;
-
-        if (error2 >= dy)
-        {
-            err += dy;
-            x0 += sx;
-        }
-
-        if (error2 <= dx)
-        {
-            err += dx;
-            y0 += sy;
-        }
-    }
-}
-
-
-void houghtransform(Image *image, Image *draw_image)
+void houghtransform(SDL_Surface* image, SDL_Renderer* draw_image)
 {
     /*
      * for now the return type is void. It will be changed
@@ -97,8 +53,8 @@ void houghtransform(Image *image, Image *draw_image)
 
 
     // image dimension
-    const double width  = image->width;
-    const double height = image->height;
+    const double width  = image->w;
+    const double height = image->h;
 
     // compute the diagonal
     const double diagonal = sqrt(width * width + height * height);
@@ -145,24 +101,35 @@ void houghtransform(Image *image, Image *draw_image)
     int rho_index;
     unsigned int max = 0;
 
+    Uint32* pixels = image->pixels;
+
+    int err = SDL_LockSurface(image);
+    if (err != 0)
+        errx(EXIT_FAILURE, "%s", SDL_GetError());
+
     for (int y = 0; y < height; y++)
     {
         for (int x = 0; x < width; x++)
         {
-            if (image->pixels[x][y].r == 255)
+            Uint32 p = get_pixel(image, x, y);
+            SDL_Color rgb;
+            SDL_GetRGB(p, image->format, &rgb.r, &rgb.g, &rgb.b);
+            if (rgb.r == 255)
             {
                 for (int i = 0; i <= arrlen; i++)
                 {
-                    rho = x * cos(deg2rad(arr_theta[i])) +
-                        y * sin(deg2rad(arr_theta[i]));
+                    rho = (int)x * cos(deg2rad(arr_theta[i])) +
+                        (int)y * sin(deg2rad(arr_theta[i]));
                     rho_index = rho + diagonal;
                     accumulator[rho_index][i]++;
                     if (accumulator[rho_index][i] > max)
-                        max = = accumulator[rho_index][i];
+                        max = accumulator[rho_index][i];
                 }
             }
         }
     }
+
+    SDL_UnlockSurface(image);
 
     // line threshold computation
     int lineThreshold = max * THRESHOLD;
@@ -173,8 +140,6 @@ void houghtransform(Image *image, Image *draw_image)
     int prev_rho = 0;
     int increase = 1;
 
-    // pixel color for the lines
-    Pixel pixel = { .r = 200, .g = 0, .b = 200 };
 
     for (int theta = 0; theta <= arrlen; theta++)
     {
@@ -209,29 +174,109 @@ void houghtransform(Image *image, Image *draw_image)
                 double c = cos(t);
                 double s = sin(t);
 
-                dot d0, d1, d2;
 
-                d0.x = (int)(c * r);
-                d0.y = (int)(s * r);
+                int x = (int)(c * r);
+                int y = (int)(s * r);
 
-                d1.x = d0.x + (int)(diagonal * (-s));
-                d1.y = d0.x + (int)(diagonal * c);
+                int x1 = x + (int)(diagonal * (-s));
+                int y1 = x + (int)(diagonal * c);
 
-                d2.x = d0.x - (int)(diagonal * (-s));
-                d2.y = d0.x - (int)(diagonal * c);
+                int x2 = x - (int)(diagonal * (-s));
+                int y2 = x - (int)(diagonal * c);
 
-                Line line;
-                line.x0 = d1.x;
-                line.y0 = d1.y;
-                line.x1 = d2.x;
-                line.y1 = d2.y;
 
-                draw_line(draw_image, width, height, &line, &pixel);
-
+                SDL_RenderDrawLine(draw_image, x1, y1, x2, y2);
             }
-
         }
     }
+}
 
 
+SDL_Surface* load_image(const char* path)
+{
+	SDL_Surface* temp = IMG_Load(path);
+	if (temp == NULL)
+		errx(EXIT_FAILURE, "%s", SDL_GetError());
+
+	SDL_Surface* ret = SDL_ConvertSurfaceFormat(temp, SDL_PIXELFORMAT_RGB888, 0);
+	if (ret == NULL)
+		errx(EXIT_FAILURE, "%s", SDL_GetError());
+
+	SDL_FreeSurface(temp);
+
+	return ret;
+}
+
+int main(int argc, char** argv)
+{
+    if (argc != 2)
+    {
+        printf("Error: expected 1 argument, got: %i\n", argc - 1);
+        printf("Usage: ./COMMAND <PATH>\n");
+        return EXIT_FAILURE;
+    }
+
+    // initialize the SDL
+    if (SDL_Init(SDL_INIT_VIDEO) != 0)
+        errx(EXIT_FAILURE, "%s", SDL_GetError());
+
+    // create widow
+    SDL_Window* window = SDL_CreateWindow("", 0, 0, 480, 640,
+            SDL_WINDOW_HIDDEN);
+    if (window == NULL)
+        errx(EXIT_FAILURE, "%s", SDL_GetError());
+
+    // create a renderer
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1,
+            SDL_RENDERER_ACCELERATED);
+    if (renderer == NULL)
+        errx(EXIT_FAILURE, "%s", SDL_GetError());
+
+    // load the image
+    SDL_Texture* imageTexture = IMG_LoadTexture(renderer, argv[1]);
+    if (imageTexture == NULL)
+        errx(EXIT_FAILURE, "%s", SDL_GetError());
+
+    // Create a surface to detect the grid
+    SDL_Surface* image = load_image(argv[1]);
+    if (image == NULL)
+        errx(EXIT_FAILURE, "%s", SDL_GetError());
+
+    // create a texture to draw on
+    SDL_Texture* targetTexture = SDL_CreateTexture(renderer,
+            SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 800, 600);
+
+    // set the target texture
+    SDL_SetRenderTarget(renderer, targetTexture);
+
+    // set the drawing color
+    SDL_SetRenderDrawColor(renderer, 200, 0, 200, 255);
+
+    // Apply grid detection algorithm
+    houghtransform(image, renderer);
+
+    // reset the target to the default renderer
+    SDL_SetRenderTarget(renderer, NULL);
+
+    // clear the screen
+    SDL_RenderClear(renderer);
+
+    // copy the target texture to the renderer
+    SDL_RenderCopy(renderer, imageTexture, NULL, NULL);
+
+    // Present the result
+    SDL_RenderPresent(renderer);
+
+    // Save the result as a new image
+    SDL_RenderReadPixels(renderer, NULL, SDL_PIXELFORMAT_RGBA8888,
+            "drawn-grid_image.png", 0);
+
+    // Quit SDL
+    SDL_DestroyTexture(imageTexture);
+    SDL_DestroyTexture(targetTexture);
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
+
+    return EXIT_SUCCESS;
 }
