@@ -1,10 +1,10 @@
 #include "maths_func.h"
 
 
-// random number generator (between -1 and 1)
+// random number generator (between -0.5 and 0.5)
 double randomDbl()
 {
-	return (((double)rand()) / ((double)RAND_MAX)) * 2 - 1;
+	return (((double)rand()) / ((double)RAND_MAX)) - 0.5f;
 }
 
 

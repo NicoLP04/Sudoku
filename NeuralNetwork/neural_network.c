@@ -38,8 +38,8 @@ void train_xor(int argc, char *file, char trainingInputs[4][2], char trainingOut
 	if (argc > 2)
 		exit_help();
 
-	int epochs = 10000;
-	double variance = 10.0f;
+	int epochs = 100000;
+	double variance = 0.5f;
 
 	train(epochs, variance, trainingInputs, trainingOutputs, file);
 
