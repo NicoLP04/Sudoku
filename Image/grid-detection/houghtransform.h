@@ -1,3 +1,6 @@
+#ifndef HOUGHTRANSFORM_H
+#define HOUGHTRANSFORM_H
+
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <err.h>
@@ -20,3 +23,5 @@ void houghtransform(SDL_Surface* image, SDL_Renderer* draw_image)
 
 // creates a SDL surface from a path
 SDL_Surface* load_image(const char* path)
+
+#endif
