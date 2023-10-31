@@ -102,8 +102,8 @@ void houghtransform(SDL_Surface* image, SDL_Renderer* draw_image)
             {
                 for (int i = 0; i <= arrlen; i++)
                 {
-                    rho = x * cos(deg2rad(arr_theta[i])) +
-                        y * sin(deg2rad(arr_theta[i]));
+                    rho = x * cos((arr_theta[i])) +
+                        y * sin((arr_theta[i]));
                     rho_index = rho + diagonal;
                     accumulator[rho_index][i]++;
                     if (accumulator[rho_index][i] > max)
