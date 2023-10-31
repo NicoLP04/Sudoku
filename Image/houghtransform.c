@@ -1,7 +1,7 @@
 #include "houghtransform.h"
 #include "pixel.h"
 
-#define THRESHOLD 0.5
+#define THRESHOLD 0.6
 
 unsigned int** initMat(unsigned int x, unsigned int y)
 {
@@ -34,6 +34,7 @@ double rad2deg(double radian)
 }
 
 
+
 void houghtransform(SDL_Surface* image, SDL_Renderer* draw_image)
 {
     /*
@@ -48,8 +49,7 @@ void houghtransform(SDL_Surface* image, SDL_Renderer* draw_image)
      *                will be applied
      * Image *draw_image : a pointer to the image on which the hough curve
      *                     will be drawn
-     *
-    */
+     */
 
 
     // image dimension
@@ -187,6 +187,7 @@ void houghtransform(SDL_Surface* image, SDL_Renderer* draw_image)
                 int y2 = y - (int)(diagonal * c);
 
 
+                SDL_SetRenderDrawColor(draw_image, 200, 0, 200, 255);
                 SDL_RenderDrawLine(draw_image, x1, y1, x2, y2);
             }
         }
@@ -199,6 +200,7 @@ void houghtransform(SDL_Surface* image, SDL_Renderer* draw_image)
         free(accumulator[i]);
     free(accumulator);
 }
+
 
 
 SDL_Surface* load_image(const char* path)
@@ -230,8 +232,8 @@ int main(int argc, char** argv)
         errx(EXIT_FAILURE, "%s", SDL_GetError());
 
     // create widow
-    SDL_Window* window = SDL_CreateWindow("", 0, 0, 480, 640,
-            SDL_WINDOW_HIDDEN);
+    SDL_Window* window = SDL_CreateWindow("image display", 0, 0, 900, 900,
+            SDL_WINDOW_SHOWN);
     if (window == NULL)
         errx(EXIT_FAILURE, "%s", SDL_GetError());
 
@@ -253,13 +255,11 @@ int main(int argc, char** argv)
 
     // create a texture to draw on
     SDL_Texture* targetTexture = SDL_CreateTexture(renderer,
-            SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, 800, 600);
+            SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, image->w, image->h);
 
     // set the target texture
     SDL_SetRenderTarget(renderer, targetTexture);
-
-    // set the drawing color
-    SDL_SetRenderDrawColor(renderer, 200, 0, 200, 255);
+    SDL_RenderSetLogicalSize(renderer, image->w, image->h);
 
     // Apply grid detection algorithm
     houghtransform(image, renderer);
@@ -271,14 +271,19 @@ int main(int argc, char** argv)
     SDL_RenderClear(renderer);
 
     // copy the target texture to the renderer
-    SDL_RenderCopy(renderer, imageTexture, NULL, NULL);
+    SDL_RenderCopy(renderer, targetTexture, NULL, NULL);
 
     // Present the result
     SDL_RenderPresent(renderer);
 
-    // Save the result as a new image
-    SDL_RenderReadPixels(renderer, NULL, SDL_PIXELFORMAT_RGBA8888,
-            "drawn-grid_image.png", 0);
+    int quit = 0;
+    SDL_Event e;
+    while (!quit)
+    {
+        while (SDL_PollEvent(&e) != 0)
+            if (e.type == SDL_QUIT)
+                quit = 1;
+    }
 
     // Quit SDL
     SDL_FreeSurface(image);
