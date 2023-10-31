@@ -1,7 +1,7 @@
 #include "houghtransform.h"
 #include "pixel.h"
 
-#define THRESHOLD 0.6
+#define THRESHOLD 0.5
 
 unsigned int** initMat(unsigned int x, unsigned int y)
 {
@@ -13,7 +13,7 @@ unsigned int** initMat(unsigned int x, unsigned int y)
 
     for(size_t i = 0; i < y; i++)
     {
-        mat[i] = calloc(x + 1, sizeof(unsigned int*));
+        mat[i] = calloc(x + 1, sizeof(unsigned int));
         if (mat[i] == NULL)
             errx(1, "memory error");
     }
@@ -37,20 +37,6 @@ double rad2deg(double radian)
 
 void houghtransform(SDL_Surface* image, SDL_Renderer* draw_image)
 {
-    /*
-     * for now the return type is void. It will be changed
-     *
-     * for now there is no parameter. It will be changed later the function
-     * should return a list of all the lines of the sudoku grid
-     *
-     * Parameters :
-     * -----------------------------------------------------------------------
-     * Image *image : a pointer on the image on which the hough transform
-     *                will be applied
-     * Image *draw_image : a pointer to the image on which the hough curve
-     *                     will be drawn
-     */
-
 
     // image dimension
     const double width  = image->w;
@@ -116,8 +102,8 @@ void houghtransform(SDL_Surface* image, SDL_Renderer* draw_image)
             {
                 for (int i = 0; i <= arrlen; i++)
                 {
-                    rho = (int)x * cos(deg2rad(arr_theta[i])) +
-                        (int)y * sin(deg2rad(arr_theta[i]));
+                    rho = x * cos(deg2rad(arr_theta[i])) +
+                        y * sin(deg2rad(arr_theta[i]));
                     rho_index = rho + diagonal;
                     accumulator[rho_index][i]++;
                     if (accumulator[rho_index][i] > max)
@@ -133,7 +119,7 @@ void houghtransform(SDL_Surface* image, SDL_Renderer* draw_image)
     int lineThreshold = max * THRESHOLD;
 
     // creating the lines and drawing them on the draw_image.
-    int prev = 0;
+    int prev = accumulator[0][0];
     int prev_theta = 0;
     int prev_rho = 0;
     int increase = 1;
@@ -186,8 +172,11 @@ void houghtransform(SDL_Surface* image, SDL_Renderer* draw_image)
                 int x2 = x - (int)(diagonal * (-s));
                 int y2 = y - (int)(diagonal * c);
 
+                printf("line : x1 = %4i, y1 = %4i / x2 = %4i, y2 = %4i\n", x1, y1, x2, y2);
 
+                // set draw color to magenta
                 SDL_SetRenderDrawColor(draw_image, 200, 0, 200, 255);
+                // draw the line
                 SDL_RenderDrawLine(draw_image, x1, y1, x2, y2);
             }
         }
@@ -232,7 +221,7 @@ int main(int argc, char** argv)
         errx(EXIT_FAILURE, "%s", SDL_GetError());
 
     // create widow
-    SDL_Window* window = SDL_CreateWindow("image display", 0, 0, 900, 900,
+    SDL_Window* window = SDL_CreateWindow("image display", 200, 200, 700, 700,
             SDL_WINDOW_SHOWN);
     if (window == NULL)
         errx(EXIT_FAILURE, "%s", SDL_GetError());
@@ -261,6 +250,9 @@ int main(int argc, char** argv)
     SDL_SetRenderTarget(renderer, targetTexture);
     SDL_RenderSetLogicalSize(renderer, image->w, image->h);
 
+    // Draw the original image onto the resultTexture
+    SDL_RenderCopy(renderer, imageTexture, NULL, NULL);
+
     // Apply grid detection algorithm
     houghtransform(image, renderer);
 
@@ -270,7 +262,7 @@ int main(int argc, char** argv)
     // clear the screen
     SDL_RenderClear(renderer);
 
-    // copy the target texture to the renderer
+    // copy the image texture to the renderer
     SDL_RenderCopy(renderer, targetTexture, NULL, NULL);
 
     // Present the result
