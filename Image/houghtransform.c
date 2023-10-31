@@ -98,7 +98,7 @@ void houghtransform(SDL_Surface* image, SDL_Renderer* draw_image)
             Uint32 p = get_pixel(image, x, y);
             SDL_Color rgb;
             SDL_GetRGB(p, image->format, &rgb.r, &rgb.g, &rgb.b);
-            if (rgb.r == 255)
+            if (rgb.r == 255 && rgb.g == 255 && rgb.b == 255)
             {
                 for (int i = 0; i <= arrlen; i++)
                 {
