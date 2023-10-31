@@ -191,6 +191,13 @@ void houghtransform(SDL_Surface* image, SDL_Renderer* draw_image)
             }
         }
     }
+
+    free(arr_rhos);
+    free(arr_theta);
+
+    for (size_t i = 0; i < arrlen; ++i)
+        free(accumulator[i]);
+    free(accumulator);
 }
 
 
@@ -274,6 +281,7 @@ int main(int argc, char** argv)
             "drawn-grid_image.png", 0);
 
     // Quit SDL
+    SDL_FreeSurface(image);
     SDL_DestroyTexture(imageTexture);
     SDL_DestroyTexture(targetTexture);
     SDL_DestroyRenderer(renderer);
