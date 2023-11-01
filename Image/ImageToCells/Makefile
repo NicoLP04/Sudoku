@@ -1,6 +1,6 @@
 # Makefile
 
-TARGET = Image
+TARGET = ImageToCells
 CC = gcc
 CPPFLAGS = -MMD
 CFLAGS = -Wall -Wextra -O3 -g -fsanitize=address `pkg-config --cflags sdl2 SDL2_image`
