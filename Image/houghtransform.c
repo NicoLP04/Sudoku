@@ -98,7 +98,7 @@ void houghtransform(SDL_Surface* image, SDL_Renderer* draw_image)
             Uint32 p = get_pixel(image, x, y);
             SDL_Color rgb;
             SDL_GetRGB(p, image->format, &rgb.r, &rgb.g, &rgb.b);
-            if (rgb.r == 255 && rgb.g == 255 && rgb.b == 255)
+            if (rgb.r >= 175 && rgb.g >= 175 && rgb.b >= 175)
             {
                 for (int i = 0; i <= arrlen; i++)
                 {
@@ -117,6 +117,7 @@ void houghtransform(SDL_Surface* image, SDL_Renderer* draw_image)
 
     // line threshold computation
     int lineThreshold = max * THRESHOLD;
+    printf("linethreshold = %i\n", lineThreshold);
 
     // creating the lines and drawing them on the draw_image.
     int prev = accumulator[0][0];
@@ -175,6 +176,7 @@ void houghtransform(SDL_Surface* image, SDL_Renderer* draw_image)
 
                 printf("line n*%5i : x1 = %4i, y1 = %4i / x2 = %4i, y2 = %4i\n", linecount, x1, y1, x2, y2);
                 linecount++;
+
 
                 // set draw color to magenta
                 SDL_SetRenderDrawColor(draw_image, 200, 0, 200, 255);
