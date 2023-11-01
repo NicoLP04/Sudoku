@@ -123,6 +123,7 @@ void houghtransform(SDL_Surface* image, SDL_Renderer* draw_image)
     int prev_theta = 0;
     int prev_rho = 0;
     int increase = 1;
+    int linecount = 1;
 
 
     for (int theta = 0; theta <= arrlen; theta++)
@@ -172,7 +173,8 @@ void houghtransform(SDL_Surface* image, SDL_Renderer* draw_image)
                 int x2 = x - (int)(diagonal * (-s));
                 int y2 = y - (int)(diagonal * c);
 
-                printf("line : x1 = %4i, y1 = %4i / x2 = %4i, y2 = %4i\n", x1, y1, x2, y2);
+                printf("line n*%5i : x1 = %4i, y1 = %4i / x2 = %4i, y2 = %4i\n", linecount, x1, y1, x2, y2);
+                linecount++;
 
                 // set draw color to magenta
                 SDL_SetRenderDrawColor(draw_image, 200, 0, 200, 255);
@@ -181,6 +183,7 @@ void houghtransform(SDL_Surface* image, SDL_Renderer* draw_image)
             }
         }
     }
+
 
     free(arr_rhos);
     free(arr_theta);
