@@ -27,23 +27,37 @@ void predict_xor(int argc, char *file, char trainingInputs[4][2], char trainingO
 	for (size_t j = 0; j < 4; j++)
 	{
 		double o = predict(trainingInputs[j][0], trainingInputs[j][1], file)[0];
-		printf("For input [%hhi, %hhi] expected %hhi, predicted %f\n",
-			trainingInputs[j][0], trainingInputs[j][1], trainingOutputs[j][0], o);
+		int res = 0;
+		if (o > 0.5f)
+			res = 1;
+		printf("For input [%hhi, %hhi] expected %hhi, predicted %d (%f)\n",
+			trainingInputs[j][0], trainingInputs[j][1], trainingOutputs[j][0], res, o);
 	}
 }
 
 
-void train_xor(int argc, char *file, char trainingInputs[4][2], char trainingOutputs[4][1])
+void train_xor(int argc, char** argv, char *file, char trainingInputs[4][2], char trainingOutputs[4][1])
 {
-	if (argc > 2)
+	if (argc > 4)
 		exit_help();
 
 	int epochs = 100000;
-	double variance = 0.5f;
+	double lr = 0.1f;
+	char *endptr;
 
-	train(epochs, variance, trainingInputs, trainingOutputs, file);
+	if (argc >= 3)
+		epochs = atoi(argv[2]);
+	if (argc == 4)
+	{
+		lr = strtod(argv[3], &endptr);
+		if (*endptr != 0)
+			exit_help();
+	}
 
-	printf("Neural network successfully trained !\n");
+	train(epochs, lr, trainingInputs, trainingOutputs, file);
+
+	printf("Neural network successfully trained with parameters: \n");
+	printf("epochs = %d && lr = %f\n", epochs, lr);
 }
 
 
@@ -120,7 +134,7 @@ int main(int argc, char **argv)
 	if (strcmp(argv[1], "--predict") == 0)
 		predict_xor(argc, "values", trainingInputs, trainingOutputs);
 	else if (strcmp(argv[1], "--train") == 0)
-		train_xor(argc, "values", trainingInputs, trainingOutputs);
+		train_xor(argc, argv, "values", trainingInputs, trainingOutputs);
 	else if (strcmp(argv[1], "--reset") == 0)
 		reset_xor(argc, "values");
 	else
