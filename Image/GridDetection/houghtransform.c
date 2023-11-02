@@ -3,6 +3,18 @@
 
 #define THRESHOLD 0.5
 
+void* line2voidptr(Line line)
+{
+    void* ptr = malloc(sizeof(Line));
+
+    if (ptr == NULL)
+        errx(EXIT_FAILURE, "line2voidptr : malloc failed!");
+
+    *(Line*)ptr = line;
+
+    return ptr;
+}
+
 unsigned int** initMat(unsigned int x, unsigned int y)
 {
     unsigned int** mat = NULL;
@@ -66,7 +78,7 @@ void array_fill(double* arr, double len, double step, double maxVal,
 }
 
 
-void houghtransform(SDL_Surface* image, SDL_Renderer* draw_image)
+List houghtransform(SDL_Surface* image, SDL_Renderer* draw_image)
 {
 
     // image dimension
@@ -137,6 +149,8 @@ void houghtransform(SDL_Surface* image, SDL_Renderer* draw_image)
     int prev_rho = 0;
     int increase = 1;
 
+    List lines = { NULL, NULL, 0 };
+
 
     for (int theta = 0; theta <= arrlen; theta++)
     {
@@ -170,11 +184,8 @@ void houghtransform(SDL_Surface* image, SDL_Renderer* draw_image)
                 double r = arr_rhos[prev_rho];
                 double t = arr_theta[prev_theta];
 
-                // drawing the line on the draw image.
-
                 double c = cos(t);
                 double s = sin(t);
-
 
                 int x = (int)(c * r);
                 int y = (int)(s * r);
@@ -185,11 +196,27 @@ void houghtransform(SDL_Surface* image, SDL_Renderer* draw_image)
                 int x2 = x - (int)(diagonal * (-s));
                 int y2 = y - (int)(diagonal * c);
 
+                Line line;
+                line.X0 = x1;
+                line.Y0 = y1;
+                line.X1 = x2;
+                line.Y1 = y2;
+                line.theta = t;
 
-                // set draw color to magenta
-                SDL_SetRenderDrawColor(draw_image, 200, 0, 200, 255);
-                // draw the line
-                SDL_RenderDrawLine(draw_image, x1, y1, x2, y2);
+                void* p = line2voidptr(line);
+
+                appendValue(&lines, p);
+
+
+                int draw = 0;
+                if (draw)
+                {
+                    // set draw color to magenta
+                    SDL_SetRenderDrawColor(draw_image, 200, 0, 200, 255);
+                    // draw the line
+                    SDL_RenderDrawLine(draw_image, x1, y1, x2, y2);
+                }
+
             }
         }
     }
@@ -198,6 +225,8 @@ void houghtransform(SDL_Surface* image, SDL_Renderer* draw_image)
     free(arr_rhos);
     free(arr_theta);
     freeMat(accumulator, arrlen);
+
+    return lines;
 }
 
 
@@ -216,7 +245,7 @@ int main(int argc, char** argv)
 
     // create widow
     SDL_Window* window = SDL_CreateWindow("image display", 200, 200, 700, 700,
-            SDL_WINDOW_SHOWN);
+            SDL_WINDOW_HIDDEN);
     if (window == NULL)
         errx(EXIT_FAILURE, "%s", SDL_GetError());
 
@@ -249,7 +278,8 @@ int main(int argc, char** argv)
     SDL_RenderCopy(renderer, imageTexture, NULL, NULL);
 
     // Apply grid detection algorithm
-    houghtransform(image, renderer);
+    List lines = houghtransform(image, renderer);
+    printListOfLines(&lines);
 
     // reset the target to the default renderer
     SDL_SetRenderTarget(renderer, NULL);
@@ -263,7 +293,7 @@ int main(int argc, char** argv)
     // Present the result
     SDL_RenderPresent(renderer);
 
-    int quit = 0;
+    int quit = 1;
     SDL_Event e;
     while (!quit)
     {
@@ -279,6 +309,8 @@ int main(int argc, char** argv)
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
+
+    freeList(&lines);
 
     return EXIT_SUCCESS;
 }
