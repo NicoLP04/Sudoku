@@ -1,23 +1,29 @@
 # Makefile
 
+TARGET = main
 CC = gcc
-CPPFLAGS =
-CFLAGS = -Wall -Wextra -O3 `pkg-config --cflags sdl2 SDL2_image`
-LDFLAGS =
-LDLIBS = `pkg-config --libs sdl2 SDL2_image`
+CPPFLAGS = -MMD
+CFLAGS = -Wall -Wextra -O3 -g -fsanitize=address `pkg-config --cflags sdl2 SDL2_image`
+LDFLAGS = -fsanitize=address `pkg-config --cflags sdl2 SDL2_image` -lSDL2 -lSDL2_image
+LDLIBS = -lm `pkg-config --cflags sdl2 SDL2_image`
 
-all: filters
 
-SRC = filters.c
+SRC := $(shell find -name '*.c')
 OBJ = ${SRC:.c=.o}
-EXE = ${SRC:.c=}
+DEP = ${SRC:.c=.d}
 
-filters: filters.o
+all: $(TARGET)
+
+$(TARGET): ${OBJ}
+	$(CC) $(LDFLAGS) $(OBJ) $(LDLIBS) -o $(TARGET)
 
 .PHONY: clean
 
 clean:
 	${RM} ${OBJ}
-	${RM} ${EXE}
+	${RM} ${DEP}
+	${RM} ${TARGET}
+
+-include ${DEP}
 
 # END
