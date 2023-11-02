@@ -1,6 +1,7 @@
 #ifndef FILTERS_H
 #define FILTERS_H
 
+#include <err.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
 #include <stdlib.h>

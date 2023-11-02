@@ -23,6 +23,7 @@ clean:
 	${RM} ${OBJ}
 	${RM} ${DEP}
 	${RM} ${TARGET}
+	rm grayimage.jpeg
 
 -include ${DEP}
 
