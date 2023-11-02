@@ -30,7 +30,7 @@ double *predict(char i1, char i2, char *file)
 		double activation = hiddenLayerBias[k];
 		for (size_t l = 0; l < numInputs; l++)
 			activation += hiddenWeights[l][k] * inputs[l];
-		hiddenLayer[k] = sigmoid(activation);
+		hiddenLayer[k] = relu(activation);
 	}
 
 	for (size_t k = 0; k < numOutputs; k++)
@@ -70,7 +70,7 @@ void train(long epochs, double lr, char trainingInputs[4][2], char trainingOutpu
 				double activation = hiddenLayerBias[k];
 				for (size_t l = 0; l < numInputs; l++)
 					activation += hiddenWeights[l][k] * inputs[l];
-				hiddenLayer[k] = sigmoid(activation);
+				hiddenLayer[k] = relu(activation);
 			}
 
 			for (size_t k = 0; k < numOutputs; k++)
@@ -93,7 +93,7 @@ void train(long epochs, double lr, char trainingInputs[4][2], char trainingOutpu
 				double error = 0.0f;
 				for (size_t l = 0; l < numOutputs; l++)
 					error += derrors[l] * outputWeights[k][l];
-				dhidden[k] = error * sigmoid_prime(hiddenLayer[k]);
+				dhidden[k] = error * relu_prime(hiddenLayer[k]);
 			}
 
 			// Apply change
