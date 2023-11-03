@@ -12,25 +12,30 @@ SDL_Renderer* gRenderer = NULL;
 SDL_Texture* gTexture = NULL;
 
 // Function to load an image and create a surface
-SDL_Surface* loadSurface(char* path) {
-    SDL_Surface* loadedSurface = IMG_Load(path);
-    if (loadedSurface == NULL) {
-        printf("Unable to load image %s! SDL_image Error: %s\n", path, IMG_GetError());
-    }
-    return loadedSurface;
+SDL_Surface* loadSurface(char* path)
+{
+    	SDL_Surface* loadedSurface = IMG_Load(path);
+    	if (loadedSurface == NULL)
+	{
+printf("Unable to load image %s! SDL_image Error: %s\n", path, IMG_GetError());
+    	}
+    	return loadedSurface;
 }
 
 
 SDL_Texture* loadTexture(char* path, SDL_Renderer* renderer) {
     SDL_Surface* loadedSurface = IMG_Load(path);
     if (loadedSurface == NULL) {
-        printf("Unable to load image %s! SDL_image Error: %s\n", path, IMG_GetError());
+        printf("Unable to load image %s! SDL_image Error:%s\n",
+        path, IMG_GetError());
         return NULL;
     }
 
-    SDL_Texture* newTexture = SDL_CreateTextureFromSurface(renderer, loadedSurface);
+    SDL_Texture* newTexture =
+SDL_CreateTextureFromSurface(renderer, loadedSurface);
     if (newTexture == NULL) {
-        printf("Unable to create texture from %s! SDL Error: %s\n", path, SDL_GetError());
+        printf("Unable to create texture from %s ! SDL Error: %s\n",
+        path, SDL_GetError());
     }
 
     SDL_FreeSurface(loadedSurface);
@@ -44,7 +49,7 @@ Uint32 getPixel(SDL_Surface* surface, int x, int y) {
     int bpp = surface->format->BytesPerPixel;
     Uint8* p = (Uint8*)surface->pixels + y * surface->pitch + x * bpp;
     //printf("%" PRIu8 "\n",*p);
-    switch (bpp) 
+    switch (bpp)
     {
         case 1:
             //printf("1");
@@ -74,7 +79,6 @@ Uint32 getPixel(SDL_Surface* surface, int x, int y) {
 void putPixel(SDL_Surface* surface, int x, int y, Uint32 pixel) {
     int bpp = surface->format->BytesPerPixel;
     Uint8* p = (Uint8*)surface->pixels + y * surface->pitch + x * bpp;
-    
     switch(bpp) {
         case 1:
             *p = (Uint8)pixel;
@@ -132,22 +136,26 @@ Uint32 bilinearInterpolation(SDL_Surface* surface, double x, double y) {
 
 
 // Function to rotate a surface by a given angle (in degrees)
-SDL_Surface* rotateSurface(SDL_Surface* srcSurface, double angle) 
+SDL_Surface* rotateSurface(SDL_Surface* srcSurface, double angle)
 {
-    if (srcSurface == NULL) 
+    if (srcSurface == NULL)
     {
         return NULL;
     }
     angle = 360- angle;
     double radAngle = angle * M_PI / 180.0;
-    int newWidth = (int)(fabs(srcSurface->w * cos(radAngle)) + fabs(srcSurface->h * sin(radAngle)));
-    int newHeight = (int)(fabs(srcSurface->w * sin(radAngle)) + fabs(srcSurface->h * cos(radAngle)));
+    int newWidth = (int)(fabs(srcSurface->w * cos(radAngle)) +
+ fabs(srcSurface->h * sin(radAngle)));
+    int newHeight = (int)(fabs(srcSurface->w * sin(radAngle)) +
+ fabs(srcSurface->h * cos(radAngle)));
 
 
     // Create a copy of the source surface
-    SDL_Surface* rotatedSurface = SDL_CreateRGBSurfaceWithFormat(0, newWidth, newHeight, srcSurface->format->BitsPerPixel, srcSurface->format->format);
+    SDL_Surface* rotatedSurface = SDL_CreateRGBSurfaceWithFormat(0,newWidth,
+ newHeight, srcSurface->format->BitsPerPixel, srcSurface->format->format);
     if (rotatedSurface == NULL) {
-        printf("Unable to create rotated surface! SDL Error: %s\n", SDL_GetError());
+        printf("Unable to create rotated surface! SDL Error: %s\n",
+SDL_GetError());
         return NULL;
     }
     int minX = newWidth;
@@ -160,18 +168,19 @@ SDL_Surface* rotateSurface(SDL_Surface* srcSurface, double angle)
     int centerYDst = newHeight / 2;
 
     // Loop through the pixels of the rotated surface and copy from the source
-    for (int x = 0; x < newWidth; x++) 
+    for (int x = 0; x < newWidth; x++)
     {
-        for (int y = 0; y < newHeight; y++) 
+        for (int y = 0; y < newHeight; y++)
         {
-            int srcX = (int)((x - centerXDst) * cos(radAngle) - (y - centerYDst) * sin(radAngle) + centerXSrc);
-            int srcY = (int)((x - centerXDst) * sin(radAngle) + (y - centerYDst) * cos(radAngle) + centerYSrc);
+            int srcX = (int)((x - centerXDst) * cos(radAngle) -
+ (y - centerYDst) * sin(radAngle) + centerXSrc);
+            int srcY = (int)((x - centerXDst) * sin(radAngle) +
+ (y - centerYDst) * cos(radAngle) + centerYSrc);
             // Check if the source coordinates are within bounds
-            if (srcX >= 0 && srcX < srcSurface->w && srcY >= 0 && srcY < srcSurface->h) 
+            if (srcX >= 0 && srcX < srcSurface->w &&
+srcY >= 0 && srcY < srcSurface->h)
             {
-                
                 //Uint32 pixel = getPixel(srcSurface, srcX, srcY);
-
                 Uint32 pixel = bilinearInterpolation(srcSurface, srcX, srcY);
 		        if (pixel != 0xFFFFFFFF)
 		        {
@@ -190,12 +199,16 @@ SDL_Surface* rotateSurface(SDL_Surface* srcSurface, double angle)
     }
     int boxWidth = maxX - minX + 1;
     int boxHeight = maxY - minY + 1;
-    SDL_Surface* finalRotatedSurface = SDL_CreateRGBSurfaceWithFormat(0, boxWidth, boxHeight, srcSurface->format->BitsPerPixel, srcSurface->format->format);
+    SDL_Surface* finalRotatedSurface = SDL_CreateRGBSurfaceWithFormat(0,
+boxWidth, boxHeight, srcSurface->format->BitsPerPixel,
+srcSurface->format->format);
     if (finalRotatedSurface == NULL) {
-        printf("Unable to create rotated surface! SDL Error: %s\n", SDL_GetError());
+        printf("Unable to create rotated surface! SDL Error: %s\n",
+SDL_GetError());
         return NULL;
     }
-    // Copy the minimum bounding box from the rotated surface to the final surface
+    // Copy the minimum bounding box from the rotated
+//surface to the final surface
     SDL_Rect boxRect = {minX, minY, boxWidth, boxHeight};
     SDL_BlitSurface(rotatedSurface, &boxRect, finalRotatedSurface, NULL);
     // Free the temporary rotated surface
@@ -206,19 +219,22 @@ SDL_Surface* rotateSurface(SDL_Surface* srcSurface, double angle)
 
 SDL_Surface* convert1bppTo3bpp(SDL_Surface* srcSurface) {
 
-    SDL_Surface* newSurface = SDL_CreateRGBSurfaceWithFormat(0, srcSurface->w, srcSurface->h, 24, SDL_PIXELFORMAT_RGB24);
+    SDL_Surface* newSurface = SDL_CreateRGBSurfaceWithFormat(0,
+srcSurface->w, srcSurface->h, 24, SDL_PIXELFORMAT_RGB24);
     if (newSurface == NULL) {
         return NULL;
     }
 
-    for (int x = 0; x < srcSurface->w; x++) 
+    for (int x = 0; x < srcSurface->w; x++)
     {
-        for (int y = 0; y < srcSurface->h; y++) 
+        for (int y = 0; y < srcSurface->h; y++)
         {
             Uint8* pixels = (Uint8*)srcSurface->pixels;
             Uint8 pixelIndex = pixels[y * srcSurface->pitch + x];
-            SDL_Color* paletteColor = &srcSurface->format->palette->colors[pixelIndex];
-            Uint32 newColor = SDL_MapRGB(newSurface->format, paletteColor->r, paletteColor->g, paletteColor->b);
+            SDL_Color* paletteColor =
+&srcSurface->format->palette->colors[pixelIndex];
+            Uint32 newColor = SDL_MapRGB(newSurface->format,
+paletteColor->r, paletteColor->g, paletteColor->b);
             putPixel(newSurface, x, y, newColor);
         }
     }
@@ -239,7 +255,8 @@ int main(int argc, char* args[]) {
 
 
     // Create a window
-    gWindow = SDL_CreateWindow("SDL Rotate",0,0,0,0 ,SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE);
+    gWindow = SDL_CreateWindow("SDL Rotate",0,0,0,0 ,
+SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE);
 
     if (gWindow == NULL)
 	errx(EXIT_FAILURE, "%s", SDL_GetError());
@@ -262,25 +279,22 @@ int main(int argc, char* args[]) {
     if (imageSurface->format->BytesPerPixel == 1)
     {
         imageSurface = convert1bppTo3bpp(imageSurface);
-    }    
+    }
 
     // Angle of rotation (in degrees)
     double angle = strtol(args[2], NULL, 10);;
 
     SDL_Surface* rotatedSurface = rotateSurface(imageSurface, angle);
 
-    
-
     gTexture = loadTexture(args[1], gRenderer);
 
     int quit = 1;
-    while (!quit) 
+    while (!quit)
     {
         SDL_Event e;
-        while (SDL_PollEvent(&e) != 0) 
+        while (SDL_PollEvent(&e) != 0)
 	    {
-            if (e.type == SDL_QUIT) 
-	        {
+            if (e.type == SDL_QUIT)	        {
                 quit = 1;
             }
  	    }
@@ -288,7 +302,8 @@ int main(int argc, char* args[]) {
 	    SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
 	    SDL_RenderClear(gRenderer);
 	    // Render the rotated texture
-	    SDL_RenderCopyEx(gRenderer, gTexture, NULL, NULL, angle, NULL, SDL_FLIP_NONE);
+	    SDL_RenderCopyEx(gRenderer,
+gTexture, NULL, NULL, angle, NULL, SDL_FLIP_NONE);
 	    // Update the screen
 	    SDL_RenderPresent(gRenderer);
         // Update the screen
