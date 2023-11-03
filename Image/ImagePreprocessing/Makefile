@@ -1,6 +1,6 @@
 # Makefile
 
-TARGET = main
+TARGET = PreProcessing
 CC = gcc
 CPPFLAGS = -MMD
 CFLAGS = -Wall -Wextra -O3 -g -fsanitize=address `pkg-config --cflags sdl2 SDL2_image` -D\_\_NO\_INLINE\_\_
@@ -23,7 +23,7 @@ clean:
 	${RM} ${OBJ}
 	${RM} ${DEP}
 	${RM} ${TARGET}
-	rm image.jpeg
+	rm -f image.jpeg
 
 -include ${DEP}
 
