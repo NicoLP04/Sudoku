@@ -167,6 +167,7 @@ SDL_GetError());
     int centerXDst = newWidth / 2;
     int centerYDst = newHeight / 2;
 
+    SDL_LockSurface(rotatedSurface);
     // Loop through the pixels of the rotated surface and copy from the source
     for (int x = 0; x < newWidth; x++)
     {
@@ -181,7 +182,6 @@ SDL_GetError());
 srcY >= 0 && srcY < srcSurface->h)
             {
                 Uint32 pixel = getPixel(srcSurface, srcX, srcY);
-                //Uint32 pixel = bilinearInterpolation(srcSurface, srcX, srcY);
 		        if (pixel != 0xFFFFFFFF)
 		        {
 			        putPixel(rotatedSurface, x, y, pixel);
@@ -197,6 +197,7 @@ srcY >= 0 && srcY < srcSurface->h)
             }
         }
     }
+    SDL_UnlockSurface(rotatedSurface);
     int boxWidth = maxX - minX + 1;
     int boxHeight = maxY - minY + 1;
     SDL_Surface* finalRotatedSurface = SDL_CreateRGBSurfaceWithFormat(0,
@@ -208,7 +209,7 @@ SDL_GetError());
         return NULL;
     }
     // Copy the minimum bounding box from the rotated
-//surface to the final surface
+    //surface to the final surface
     SDL_Rect boxRect = {minX, minY, boxWidth, boxHeight};
     SDL_BlitSurface(rotatedSurface, &boxRect, finalRotatedSurface, NULL);
     // Free the temporary rotated surface
@@ -239,8 +240,7 @@ paletteColor->r, paletteColor->g, paletteColor->b);
             putPixel(newSurface, x, y, newColor);
         }
     }
-    printf("converting");
-    SDL_FreeSurface(newSurface);
+    //SDL_FreeSurface(newSurface);
     SDL_FreeSurface(srcSurface);
     return newSurface;
 }
@@ -255,11 +255,9 @@ int main(int argc, char* args[]) {
     // Initialize SDL_image for image loading
     if (!(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG))
 	errx(EXIT_FAILURE, "%s", SDL_GetError());
-
-
     // Create a window
     gWindow = SDL_CreateWindow("SDL Rotate",0,0,0,0 ,
-SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE);
+    SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE);
 
     if (gWindow == NULL)
 	errx(EXIT_FAILURE, "%s", SDL_GetError());
@@ -269,10 +267,7 @@ SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE);
     h = 540;
     SDL_SetWindowSize(gWindow, w,h);
 
-    // Create a renderer (not used in this example)
-    /*gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED);
-    if (gRenderer == NULL)
-	errx(EXIT_FAILURE, "%s", SDL_GetError());*/
+    double angle = strtol(args[2], NULL, 10);;
 
     // Load the image you want to rotate
     SDL_Surface* imageSurface = loadSurface(args[1]);
@@ -281,74 +276,27 @@ SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE);
     }
     if (imageSurface->format->BytesPerPixel == 1)
     {
-
-                SDL_Surface* newSurf = convert1bppTo3bpp(imageSurface);
-            SDL_FreeSurface(imageSurface);
-                double angle = strtol(args[2], NULL, 10);
-            SDL_Surface* rotatedSurface = rotateSurface(newSurf, angle);
-
-
-
-                IMG_SavePNG(rotatedSurface, "rotated.png");
-            // Clean up and quit
-
-
-            //SDL_DestroyRenderer(gRenderer);
-        //SDL_DestroyTexture(gTexture);
+        SDL_Surface* newSurf = convert1bppTo3bpp(imageSurface);
+        SDL_Surface* rotatedSurface = rotateSurface(newSurf, angle);
+        IMG_SavePNG(rotatedSurface, "rotated.png");
         SDL_FreeSurface(newSurf);
         SDL_FreeSurface(rotatedSurface);
         SDL_DestroyWindow(gWindow);
-
         IMG_Quit();
         SDL_Quit();
-
         return 0;
-
-
     }
-
-    // Angle of rotation (in degrees)
-    double angle = strtol(args[2], NULL, 10);;
 
    SDL_Surface* rotatedSurface = rotateSurface(imageSurface, angle);
 
-    /*gTexture = loadTexture(args[1], gRenderer);
-
-    int quit = 1;
-    while (!quit)
-    {
-        SDL_Event e;
-        while (SDL_PollEvent(&e) != 0)
-	    {
-            if (e.type == SDL_QUIT)
-            {
-                quit = 1;
-            }
- 	    }
-	    // Clear the screen
-	    SDL_SetRenderDrawColor(gRenderer, 255, 255, 255, 255);
-	    SDL_RenderClear(gRenderer);
-	    // Render the rotated texture
-	    SDL_RenderCopyEx(gRenderer,
-gTexture, NULL, NULL, angle, NULL, SDL_FLIP_NONE);
-	    // Update the screen
-	    SDL_RenderPresent(gRenderer);
-        // Update the screen
-        //SDL_UpdateWindowSurface(gWindow);
-    }*/
-
-    //IMG_SavePNG(rotatedSurface, "rotated.png");
    IMG_SavePNG(rotatedSurface, "rotated.png");
     // Clean up and quit
-
    // SDL_DestroyRenderer(gRenderer);
-//SDL_DestroyTexture(gTexture);
-SDL_FreeSurface(imageSurface);
-SDL_FreeSurface(rotatedSurface);
-SDL_DestroyWindow(gWindow);
-
-IMG_Quit();
-SDL_Quit();
-
-return 0;
+    //SDL_DestroyTexture(gTexture);
+    SDL_FreeSurface(imageSurface);
+    SDL_FreeSurface(rotatedSurface);
+    SDL_DestroyWindow(gWindow);
+    IMG_Quit();
+    SDL_Quit();
+    return 0;
 }
