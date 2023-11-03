@@ -8,16 +8,22 @@ OCR Sudoku Solver by Team Prague
 
 - Clone the repo
 
-- Execute ``make`` at the root of the repo
+- Execute ``make`` whenever there is a Makefile to use the scripts of its directory
 
 ## Usage
 
-### Graphical interface
+### SudokuSolver
 ```sh
-Ya pas
+./solver grille_00     # Resolved grid is in a new created file grille00.result
 ```
 
-### Terminal
+### NeuralNetwork
 ```sh
-Ya pas nn plus
+./NeuralNetwork --reset     # reset the neural network
+./NeuralNetwork --train     # train the neural network on xor function
+./NeuralNetwork --predict   # see the results of neural network on different inputs
+```
+### Image/ImageToCells
+```sh
+./ImageToCells grille.png     # cells are saved in the directory named Cells/
 ```
