@@ -3,6 +3,7 @@
 #include <SDL2/SDL_image.h>
 
 #include "filters.h"
+#include "average.h"
 
 SDL_Surface* load_image(const char* path)
 {
@@ -38,10 +39,38 @@ int main(int argc, char** argv)
     }
     //  - Transform the surface into grayscale    
 	surface_to_grayscale(s);
-
-
+    
+    Uint8 seuil = getaverage(s);
+    
+    printf("%d",seuil);
+    
+    if (seuil<150)
+    {
+        surface_to_seuillage(s,seuil+20);
+    }
+    
+    else if (seuil <175)
+    {
+        surface_to_seuillage(s,seuil-(255-seuil));
+    }
+    else if (seuil <190)
+    {
+        surface_to_seuillage(s,seuil-50);
+    }
+    else if (seuil<210)
+    {
+        surface_to_seuillage(s,seuil-15);
+    }
+    else {surface_to_seuillage(s,123);}
+    
+    //surface_to_invert(s);
     // - Save the image
-    SDL_SaveBMP(s,"grayimage.jpeg");
+    
+    surface_to_median(s);
+    //surface_to_smooth(s); Issue on smooth
+    //surface_to_median(s);
+    surface_to_invert(s);
+    SDL_SaveBMP(s,"image.jpeg");
 
     // - Free the surface.
     SDL_FreeSurface(s);
