@@ -3,13 +3,13 @@
 
 CC = gcc
 CPPFLAGS =
-CFLAGS = -Wall -Wextra -O3 -g -fsanitize=address `pkg-config --cflags sdl2 SDL2_image`
+CFLAGS = -Wall -Wextra -O3 -g -fsanitize=address `pkg-config --cflags sdl2 SDL2_image` -D\_\_NO\_INLINE\_\_
 LDFLAGS =
 LDLIBS = `pkg-config --libs sdl2 SDL2_image` -lm
 
-all: rotate
+all: reformat
 
-SRC = rotate.c
+SRC = reformat.c
 OBJ = ${SRC:.c=.o}
 EXE = ${SRC:.c=}
 
@@ -17,8 +17,9 @@ EXE = ${SRC:.c=}
 .PHONY: clean
 
 clean:
-	${RM} rotated.png
+	${RM} resized.png
 	${RM} ${OBJ}
 	${RM} ${EXE}
 
 # END
+
