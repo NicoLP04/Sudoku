@@ -7,7 +7,7 @@
 
 SDL_Surface* extract(SDL_Surface *image)
 {
-	Uint32* imagePixels = image->pixels;    
+	Uint32* imagePixels = image->pixels;
 
 	size_t width = image->w;
 	size_t height = image->h;
@@ -33,7 +33,7 @@ SDL_Surface* extract(SDL_Surface *image)
 		xstart++;
 	}
 	xstart-=2;
-	
+
 	stop = 0;
 	while (stop == 0)
 	{
@@ -47,7 +47,7 @@ SDL_Surface* extract(SDL_Surface *image)
 		xend--;
 	}
 	xend+=3;
-	
+
 	stop = 0;
 	while (stop == 0)
 	{
@@ -76,14 +76,16 @@ SDL_Surface* extract(SDL_Surface *image)
 	}
 	yend+=3;
 
-	SDL_Surface *cell = SDL_CreateRGBSurface(0, xend - xstart, yend - ystart, 32,0,0,0,0);
+	SDL_Surface *cell = SDL_CreateRGBSurface(0, xend - xstart, yend - ystart,
+      32,0,0,0,0);
 	Uint32* cellPixels = cell->pixels;
 
 	for (size_t x = xstart; x < xend; x++)
-	{	
+	{
 		for (size_t y = ystart; y < yend; y++)
         	{
-         		cellPixels[(y - ystart) * (xend - xstart) + x - xstart] = imagePixels[y * width + x];
+         		cellPixels[(y - ystart) * (xend - xstart) + x - xstart] =
+              imagePixels[y * width + x];
 		}
 	}
 
@@ -97,7 +99,7 @@ SDL_Surface* extract(SDL_Surface *image)
 SDL_Surface* remove_border(SDL_Surface *image)
 {
 
-	Uint32* imagePixels = image->pixels;    
+	Uint32* imagePixels = image->pixels;
 
 	size_t width = image->w;
 	size_t height = image->h;
@@ -111,10 +113,11 @@ SDL_Surface* remove_border(SDL_Surface *image)
 	Uint32* cellPixels = cell->pixels;
 
 	for (size_t x = width / 10; x < width - w10; x++)
-	{	
+	{
 		for (size_t y = height / 10; y < height - h10; y++)
         	{
-         		cellPixels[(y - (height / 10)) * cellw + x - width / 10] = imagePixels[y * width + x];
+         		cellPixels[(y - (height / 10)) * cellw + x - width / 10] =
+              imagePixels[y * width + x];
 		}
 	}
 
@@ -127,7 +130,7 @@ SDL_Surface* remove_border(SDL_Surface *image)
 
 void split(SDL_Surface *image)
 {
-    Uint32* imagePixels = image->pixels;    
+    Uint32* imagePixels = image->pixels;
 
     size_t width = image->w;
     size_t height = image->h;
@@ -152,7 +155,7 @@ void split(SDL_Surface *image)
     		{
      			for (size_t b = y; b < y + yincrem; b++)
         		{
-         			cellPixels[(b - y) * xincrem + a - x] = imagePixels[b * width + a];
+         			cellPixels[(b - y) * xincrem + a-x] = imagePixels[b * width + a];
         		}
     		}
 
@@ -167,7 +170,7 @@ void split(SDL_Surface *image)
 		char num[256];
 		snprintf(num, sizeof(num), "%zu", numCell);
 		strcat(cellName, num);
-		
+
 		strcat(cellName, ".png");
 
 		IMG_SavePNG(cell, cellName);
@@ -199,7 +202,8 @@ SDL_Surface* load_image(const char* path)
     SDL_Surface* temp=IMG_Load(path);
     if (temp  == NULL)
         errx(EXIT_FAILURE, "%s", SDL_GetError());
-    SDL_Surface* newsurf = SDL_ConvertSurfaceFormat(temp,SDL_PIXELFORMAT_RGB888,0);
+    SDL_Surface* newsurf =
+      SDL_ConvertSurfaceFormat(temp,SDL_PIXELFORMAT_RGB888,0);
     if (newsurf  == NULL)
         errx(EXIT_FAILURE, "%s", SDL_GetError());
     SDL_FreeSurface(temp);

@@ -46,7 +46,8 @@ double *predict(char i1, char i2, char *file)
 
 
 // train neural network
-void train(long epochs, double lr, char trainingInputs[4][2], char trainingOutputs[4][1], char *file)
+void train(long epochs, double lr, char trainingInputs[4][2],
+    char trainingOutputs[4][1], char *file)
 {
 	init_weights();
 
@@ -85,7 +86,8 @@ void train(long epochs, double lr, char trainingInputs[4][2], char trainingOutpu
 			// backpropagation
 			double derrors[numOutputs];
 			for (size_t k = 0; k < numOutputs; k++)
-				derrors[k] = (targets[k] - outputLayer[k]) * sigmoid_prime(outputLayer[k]);
+				derrors[k] = (targets[k] - outputLayer[k]) *
+          sigmoid_prime(outputLayer[k]);
 
 			double dhidden[numHiddens];
 			for (size_t k = 0; k < numHiddens; k++)

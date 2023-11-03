@@ -19,7 +19,8 @@ void exit_help()
 }
 
 
-void predict_xor(int argc, char *file, char trainingInputs[4][2], char trainingOutputs[4][1])
+void predict_xor(int argc, char *file, char trainingInputs[4][2],
+    char trainingOutputs[4][1])
 {
 	if (argc > 2)
 		exit_help();
@@ -27,16 +28,17 @@ void predict_xor(int argc, char *file, char trainingInputs[4][2], char trainingO
 	for (size_t j = 0; j < 4; j++)
 	{
 		double o = predict(trainingInputs[j][0], trainingInputs[j][1], file)[0];
-		int res = 0;
+		int r = 0;
 		if (o > 0.5f)
-			res = 1;
+			r = 1;
 		printf("For input [%hhi, %hhi] expected %hhi, predicted %d (%f)\n",
-			trainingInputs[j][0], trainingInputs[j][1], trainingOutputs[j][0], res, o);
+			trainingInputs[j][0], trainingInputs[j][1], trainingOutputs[j][0], r, o);
 	}
 }
 
 
-void train_xor(int argc, char** argv, char *file, char trainingInputs[4][2], char trainingOutputs[4][1])
+void train_xor(int argc, char** argv, char *file, char trainingInputs[4][2],
+    char trainingOutputs[4][1])
 {
 	if (argc > 4)
 		exit_help();
