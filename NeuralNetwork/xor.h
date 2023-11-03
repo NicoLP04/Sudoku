@@ -6,7 +6,7 @@
 
 // Number of Nodes
 #define numInputs 2
-#define numHiddens 3
+#define numHiddens 10
 #define numOutputs 1
 
 

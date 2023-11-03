@@ -9,7 +9,7 @@
 char s[size][size] = {};
 
 
-int is_valid(char row, char col, char val)
+int is_valid(size_t row, size_t col, char val)
 {
 	// verify if row is valid
 	for (size_t i = 0; i < size; i++)
@@ -37,7 +37,7 @@ int is_valid(char row, char col, char val)
 }
 
 
-int solve(char row, char col)
+int solve(size_t row, size_t col)
 {
 	if (row == 9)
 		return 1;
