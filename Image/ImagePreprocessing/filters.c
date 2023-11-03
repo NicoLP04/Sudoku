@@ -169,3 +169,32 @@ void surface_to_smooth(SDL_Surface* surface)
 }
 
 
+
+// ***************      CONTRAST    *****************
+
+static Uint32 pixel_to_contrast(Uint32 pixel_color, SDL_PixelFormat* format,int* histogram,int len)
+{
+	Uint8 r, g, b;
+	SDL_GetRGB(pixel_color, format, &r, &g, &b);
+
+	double temp = (double)histogram[r]/(double)len;
+	
+	double val = r*(259*(temp+255))/(255*(259-temp));
+	
+	return SDL_MapRGB(format, val, val, val);
+}
+
+void surface_to_contrast(SDL_Surface* surface,int* histogram)
+{
+    Uint32* pixels = surface->pixels;
+	int len = surface->w * surface->h;
+	SDL_PixelFormat* format = surface->format;
+	int err = SDL_LockSurface(surface);
+	if(err!=0)
+		errx(EXIT_FAILURE, "%s", SDL_GetError());
+
+	for(int i=0; i<len; ++i)
+		pixels[i] = pixel_to_contrast(pixels[i], format,histogram,len);
+
+	SDL_UnlockSurface(surface);
+}

@@ -8,4 +8,6 @@
 
 Uint8 getaverage(SDL_Surface* surface);
 
+int* gethistogram(SDL_Surface* surface,int* tab);
+
 #endif

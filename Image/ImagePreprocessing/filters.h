@@ -16,4 +16,6 @@ void surface_to_median(SDL_Surface* surface);
 
 void surface_to_smooth(SDL_Surface* surface);
 
+void surface_to_contrast(SDL_Surface* surface,int* histogram);
+
 #endif

@@ -24,7 +24,29 @@ Uint8 getaverage(SDL_Surface* surface)
 
 	for(int i=0; i<len; ++i)
 		sum += getpixelsum(pixels[i],format) ;
-
-	return (Uint8)(sum/len);
 	SDL_UnlockSurface(surface);
+	return (Uint8)(sum/len);
+	
+}
+
+int* gethistogram(SDL_Surface* surface,int* tab)
+{
+	Uint32* pixels = surface->pixels;
+	int len = surface->w * surface->h;
+
+	int err = SDL_LockSurface(surface);
+	if(err!=0)
+		errx(EXIT_FAILURE, "%s", SDL_GetError());
+
+
+	for(int i=0; i<len; ++i)
+	{
+		SDL_Color rgb1;
+		SDL_GetRGB(pixels[i],surface->format,&rgb1.r,&rgb1.g,&rgb1.b) ;
+		tab[rgb1.r]++;
+	}
+		
+
+	SDL_UnlockSurface(surface);
+	return tab;
 }
