@@ -3,17 +3,19 @@
 
 #define THRESHOLD 0.5
 
+
 void* line2voidptr(Line line)
 {
     void* ptr = malloc(sizeof(Line));
 
     if (ptr == NULL)
-        errx(EXIT_FAILURE, "line2voidptr : malloc failed!");
+        errx(EXIT_FAILURE, "line2voidptr: malloc failed!");
 
-    *(Line*)ptr = line;
+    *(Line *)ptr = line;
 
     return ptr;
 }
+
 
 unsigned int** initMat(unsigned int x, unsigned int y)
 {
@@ -68,6 +70,24 @@ SDL_Surface* load_image(const char* path)
 
 	return ret;
 }
+
+
+void save_texture(const char* file_name, SDL_Renderer* renderer,
+        SDL_Texture* texture)
+{
+    SDL_Texture* target = SDL_GetRenderTarget(renderer);
+    SDL_SetRenderTarget(renderer, texture);
+    int width, height;
+    SDL_QueryTexture(texture, NULL, NULL, &width, &height);
+    SDL_Surface* surface = SDL_CreateRGBSurface(0, width, height, 32,
+            0, 0, 0, 0);
+    SDL_RenderReadPixels(renderer, NULL, surface->format->format,
+            surface->pixels, surface->pitch);
+    IMG_SavePNG(surface, file_name);
+    SDL_FreeSurface(surface);
+    SDL_SetRenderTarget(renderer, target);
+}
+
 
 void array_fill(double* arr, double len, double step, double maxVal,
         double minVal)
@@ -207,8 +227,7 @@ List houghtransform(SDL_Surface* image, SDL_Renderer* draw_image)
 
                 appendValue(&lines, p);
 
-
-                int draw = 0;
+                int draw = 1;
                 if (draw)
                 {
                     // set draw color to magenta
@@ -239,37 +258,39 @@ int main(int argc, char** argv)
         return EXIT_FAILURE;
     }
 
+    // setup everything to use SDL
     // initialize the SDL
     if (SDL_Init(SDL_INIT_VIDEO) != 0)
         errx(EXIT_FAILURE, "%s", SDL_GetError());
-
     // create widow
-    SDL_Window* window = SDL_CreateWindow("image display", 200, 200, 700, 700,
-            SDL_WINDOW_HIDDEN);
+    SDL_Window* window = SDL_CreateWindow("", 0, 0, 0, 0, SDL_WINDOW_HIDDEN);
     if (window == NULL)
         errx(EXIT_FAILURE, "%s", SDL_GetError());
-
     // create a renderer
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1,
             SDL_RENDERER_ACCELERATED);
     if (renderer == NULL)
         errx(EXIT_FAILURE, "%s", SDL_GetError());
 
+
+
+    // creates surface & textures that we will use
     // load the image
     SDL_Texture* imageTexture = IMG_LoadTexture(renderer, argv[1]);
     if (imageTexture == NULL)
         errx(EXIT_FAILURE, "%s", SDL_GetError());
-
     // Create a surface to detect the grid
     SDL_Surface* image = load_image(argv[1]);
     if (image == NULL)
         errx(EXIT_FAILURE, "%s", SDL_GetError());
-
     // create a texture to draw on
     SDL_Texture* targetTexture = SDL_CreateTexture(renderer,
             SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, image->w,
             image->h);
 
+
+
+    // the drawing & saving part.
     // set the target texture
     SDL_SetRenderTarget(renderer, targetTexture);
     SDL_RenderSetLogicalSize(renderer, image->w, image->h);
@@ -293,14 +314,8 @@ int main(int argc, char** argv)
     // Present the result
     SDL_RenderPresent(renderer);
 
-    int quit = 1;
-    SDL_Event e;
-    while (!quit)
-    {
-        while (SDL_PollEvent(&e) != 0)
-            if (e.type == SDL_QUIT)
-                quit = 1;
-    }
+    // Save the original image with lines drawn on it.
+    save_texture("image.png", renderer, targetTexture);
 
     // Quit SDL
     SDL_FreeSurface(image);

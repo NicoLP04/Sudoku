@@ -56,7 +56,7 @@ void appendValue(List* list, void* value)
         node->prev = list->tail;
         list->tail = node;
     }
-    
+
     list->length++;
 }
 
@@ -79,9 +79,11 @@ void freeList(List* list)
     while (curr->next != NULL)
     {
         Node* next = curr->next;
-        free(curr);
+        freeNode(curr);
         curr = next;
     }
+
+    freeNode(curr);
 }
 
 

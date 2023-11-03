@@ -19,7 +19,6 @@ typedef struct List
     size_t length;
 } List;
 
-
 Node* initNode(void* val);
 
 void appendNode(List* list, Node* node);
