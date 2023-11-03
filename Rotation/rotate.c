@@ -239,7 +239,7 @@ int main(int argc, char* args[]) {
 
 
     // Create a window
-    gWindow = SDL_CreateWindow("SDL Rotate",0,0,0,0 ,SDL_WINDOW_SHOWN | SDL_WINDOW_RESIZABLE);
+    gWindow = SDL_CreateWindow("SDL Rotate",0,0,0,0 ,SDL_WINDOW_HIDDEN | SDL_WINDOW_RESIZABLE);
 
     if (gWindow == NULL)
 	errx(EXIT_FAILURE, "%s", SDL_GetError());
@@ -273,7 +273,7 @@ int main(int argc, char* args[]) {
 
     gTexture = loadTexture(args[1], gRenderer);
 
-    int quit = 0;
+    int quit = 1;
     while (!quit) 
     {
         SDL_Event e;
