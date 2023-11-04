@@ -8,6 +8,19 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "linked_list.h"
+
+typedef struct Line
+{
+    int X0;
+    int Y0;
+    int X1;
+    int Y1;
+    double theta;
+} Line;
+
+// convert a line struct to a void pointer
+void* line2voidptr(Line line);
 
 // allocate memory for a matrix of size x by y
 unsigned int** initMat(unsigned int x, unsigned int y);
@@ -21,15 +34,12 @@ double deg2rad(double degrees);
 // convert radian to degrees
 double rad2deg(double radian);
 
-// creates a SDL surface from a path
-SDL_Surface* load_image(const char* path);
-
 // fills the array arr of length len from minVal to maxVal incrementing
 // the values with step
 void array_fill(double* arr, double len, double step, double maxVal,
         double minVal);
 
 // the houghtransform algorithm
-void houghtransform(SDL_Surface* image, SDL_Renderer* draw_image);
+List houghtransform(SDL_Surface* image, SDL_Renderer* draw_image);
 
 #endif

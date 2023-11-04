@@ -1,0 +1,499 @@
+#include "grid.h"
+
+#define DISTANCE 30
+#define SQUARE_DISTANCE 10
+
+int IsCloseEnoughLines(Line* a, Line* b)
+{
+    return abs(a->X0 - b->X0) < DISTANCE
+        && abs(a->Y0 - b->Y0) < DISTANCE
+        && abs(a->X1 - b->X1) < DISTANCE
+        && abs(a->Y1 - b->Y1) < DISTANCE;
+}
+
+
+double LineLength(Line* l)
+{
+    return sqrt(((l->X1 - l->X0) * (l->X1 - l->X0))
+            + ((l->Y1 - l->Y0) * (l->Y1 - l->Y0)));
+}
+
+
+int IsCorrectSquare(Square* sqr)
+{
+    return
+        LineLength(&(sqr->top)) - LineLength(&(sqr->bot)) < SQUARE_DISTANCE
+        &&
+        LineLength(&(sqr->top)) - LineLength(&(sqr->right)) < SQUARE_DISTANCE
+        &&
+        LineLength(&(sqr->top)) - LineLength(&(sqr->left)) < SQUARE_DISTANCE;
+}
+
+
+double Perimeter(Square* sqr)
+{
+    return LineLength(&(sqr->top)) + LineLength(&(sqr->bot))
+        + LineLength(&(sqr->left)) + LineLength(&(sqr->right));
+}
+
+
+void AverageLines(Line* a, Line* b)
+{
+    a->X0 = (a->X0 + b->X0) / 2;
+    a->Y0 = (a->Y0 + b->Y0) / 2;
+    a->X1 = (a->X1 + b->X1) / 2;
+    a->Y1 = (a->Y1 + b->Y1) / 2;
+    b->X0 = -1;
+}
+
+
+void* square2voidptr(Square square)
+{
+    void* ptr = malloc(sizeof(Square));
+
+    if (ptr == NULL)
+        errx(EXIT_FAILURE, "square2voidptr: malloc failed!");
+
+    *(Square *)ptr = square;
+
+    return ptr;
+}
+
+
+List* reduceLines(List* lines)
+{
+    // if we have no lines reducing the list is pointless
+    if (lines->length == 0)
+        errx(EXIT_FAILURE, "reduceLines: received no lines!\n");
+
+    List* reducedLines = lines;
+    Node* refNode = reducedLines->head;
+
+    for (size_t i = 0; refNode != NULL; refNode = refNode->next, ++i)
+    {
+        Line* refLine = (Line *)refNode->value;
+        // we skip the lines that are flagged
+        if (refLine->X0 == -1) continue;
+
+        Node* currNode = reducedLines->head;
+
+        for (size_t j = 0; currNode != NULL; currNode = currNode->next, ++j)
+        {
+            // skip the iteration when we are one the same line
+            if (i == j) continue;
+
+            Line* currLine = (Line *)currNode->value;
+            // we skip the line that are flagged
+            if (currLine->X0 == -1) continue;
+
+            if (IsCloseEnoughLines(refLine, currLine))
+                AverageLines(refLine, currLine);
+        }
+    }
+
+    Node* node = reducedLines->head;
+    Node* prev = NULL;
+
+    // while loop to remove flagged lines at the beginning of the linked list
+    while (node != NULL && prev == NULL)
+    {
+        Line* line = (Line *)node->value;
+        if (line->X0 == -1)
+        {
+            Node* tmp = node;
+            node = node->next;
+            reducedLines->head = node;
+            freeNode(tmp);
+            reducedLines->length--;
+        }
+        else
+        {
+            prev = node;
+            node = node->next;
+        }
+    }
+
+    //while loop to remove flagged lines anywhere in the list
+    while (node != NULL)
+    {
+        Line* line = (Line *)node->value;
+        if (line->X0 == -1)
+        {
+            Node* tmp = node;
+            node = node->next;
+            prev->next = node;
+            freeNode(tmp);
+            reducedLines->length--;
+        }
+        else
+        {
+            prev = node;
+            node = node->next;
+        }
+    }
+
+    return reducedLines;
+}
+
+
+Point findIntersection(Line* l1, Line* l2, int w, int h)
+{
+    Point point;
+
+    if ((l1->X1 - l2->X0) == 0 && (l2->X1 - l2->X0) == 0)
+    {
+        point.X = -1;
+        point.Y = -1;
+        return point;
+    }
+
+    double slope1 = ((double)l1->Y1 - (double)l1->Y0)
+        / ((double)l1->X1 - (double)l1->X0);
+    double slope2 = ((double)l2->Y1 - (double)l2->Y0)
+        / ((double)l2->X1 - (double)l2->X0);
+
+    if (((int)slope1 - (int)slope2) == 0)
+    {
+        point.X = -1;
+        point.Y = -1;
+        return point;
+    }
+
+    double o1 = (double)l1->Y0 - slope1 * (double)l1->X0;
+    double o2 = (double)l2->Y0 - slope2 * (double)l2->X0;
+
+    int x = (o1 - o2) / (slope2 - slope1);
+    int y = slope1 * (o2 - o1) / (slope1 - slope2) + o1;
+
+    if (x >= 0 && x < w && y >= 0 && y < h)
+    {
+        point.X = x;
+        point.Y = y;
+        return point;
+    }
+    else
+    {
+        point.X = -1;
+        point.Y = -1;
+        return point;
+    }
+}
+
+
+List findAllSquares(List* lines, int w, int h)
+{
+    List squares = { NULL, NULL, 0 };
+
+    Node* node1 = lines->head;
+    for (size_t i = 0; node1 != NULL; ++i, node1 = node1->next)
+    {
+        Node* node2 = lines->head;
+        for (size_t j = 0; node2 != NULL; ++i, node2 = node2->next)
+        {
+            // skip the same nodes
+            if (i == j) continue;
+
+            Line* line1 = (Line *)node1->value;
+            Line* line2 = (Line *)node2->value;
+
+            Point point1 = findIntersection(line1, line2, w, h);
+
+            if (point1.X == -1) continue;
+
+            Node* node3 = lines->head;
+            for (size_t k = 0; node3 != NULL; ++k, node3 = node3->next)
+            {
+                // skip the same nodes
+                if (j == k) continue;
+
+                Line* line3 = (Line *)node3->value;
+
+                Point point2 = findIntersection(line2, line3, w, h);
+
+                if (point2.X == -1) continue;
+
+                Node* node4 = lines->head;
+                for (size_t l = 0; node4 != NULL; ++k, node4 = node4->next)
+                {
+                    // skip the same nodes
+                    if (k == l) continue;
+
+                    Line* line4 = (Line *)node4->value;
+
+                    Point point3 = findIntersection(line3, line4, w, h);
+
+                    if (point3.X == -1) continue;
+                    if (l == i) continue;
+
+                    Point point4 = findIntersection(line4, line1, w, h);
+
+                    if (point4.X == -1) continue;
+
+                    Square square;
+
+                    Line topLine = { .X0 = point1.X,
+                                     .Y0 = point1.Y,
+                                     .X1 = point2.X,
+                                     .Y1 = point2.Y };
+                    square.top = topLine;
+
+                    Line rightLine = { .X0 = point2.X,
+                                       .Y0 = point2.Y,
+                                       .X1 = point3.X,
+                                       .Y1 = point3.Y };
+                    square.right = rightLine;
+
+                    Line botLine = { .X0 = point3.X,
+                                     .Y0 = point3.Y,
+                                     .X1 = point4.X,
+                                     .Y1 = point4.Y };
+                    square.bot = botLine;
+
+
+                    Line leftLine = { .X0 = point4.X,
+                                      .Y0 = point4.Y,
+                                      .X1 = point1.X,
+                                      .Y1 = point1.Y };
+                    square.left = leftLine;
+
+
+                    if (!IsCorrectSquare(&square)) continue;
+
+                    void* p = square2voidptr(square);
+                    appendValue(&squares, p);
+
+                }
+            }
+        }
+    }
+
+    return squares;
+}
+
+
+Square FindBestSquare(List* squarelist)
+{
+    Node* node = squarelist->head;
+    Square tmp = *(Square *)node->value;
+
+    int tmpPeri = Perimeter(&tmp);
+    node = node->next;
+
+    while (node != NULL)
+    {
+        Square* square = (Square *)node->value;
+        int Peri = Perimeter(square);
+        if (Peri > tmpPeri)
+        {
+            tmpPeri = Peri;
+            tmp = *square;
+        }
+
+        node = node->next;
+    }
+
+    return tmp;
+}
+
+
+SDL_Surface* load_image(const char* path)
+{
+	SDL_Surface* temp = IMG_Load(path);
+	if (temp == NULL)
+		errx(EXIT_FAILURE, "%s", SDL_GetError());
+
+    SDL_Surface* ret = SDL_ConvertSurfaceFormat(temp, SDL_PIXELFORMAT_RGB888,
+            0);
+	if (ret == NULL)
+		errx(EXIT_FAILURE, "%s", SDL_GetError());
+
+	SDL_FreeSurface(temp);
+
+	return ret;
+}
+
+
+void save_texture(const char* file_name, SDL_Renderer* renderer,
+        SDL_Texture* texture)
+{
+    SDL_Texture* target = SDL_GetRenderTarget(renderer);
+    SDL_SetRenderTarget(renderer, texture);
+    int width, height;
+    SDL_QueryTexture(texture, NULL, NULL, &width, &height);
+    SDL_Surface* surface = SDL_CreateRGBSurface(0, width, height, 32,
+            0, 0, 0, 0);
+    SDL_RenderReadPixels(renderer, NULL, surface->format->format,
+            surface->pixels, surface->pitch);
+    IMG_SavePNG(surface, file_name);
+    SDL_FreeSurface(surface);
+    SDL_SetRenderTarget(renderer, target);
+}
+
+
+int main(int argc, char** argv)
+{
+    if (argc != 2)
+    {
+        printf("Error: expected 1 argument, got: %i\n", argc - 1);
+        printf("Usage: ./COMMAND <PATH>\n");
+        return EXIT_FAILURE;
+    }
+
+    // setup everything to use SDL
+    // initialize the SDL
+    if (SDL_Init(SDL_INIT_VIDEO) != 0)
+        errx(EXIT_FAILURE, "%s", SDL_GetError());
+    // create widow
+    SDL_Window* window = SDL_CreateWindow("", 0, 0, 0, 0, SDL_WINDOW_HIDDEN);
+    if (window == NULL)
+        errx(EXIT_FAILURE, "%s", SDL_GetError());
+    // create a renderer
+    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1,
+            SDL_RENDERER_ACCELERATED);
+    if (renderer == NULL)
+        errx(EXIT_FAILURE, "%s", SDL_GetError());
+
+
+
+    // creates surface & textures that we will use
+    // load the image
+    SDL_Texture* imageTexture = IMG_LoadTexture(renderer, argv[1]);
+    if (imageTexture == NULL)
+        errx(EXIT_FAILURE, "%s", SDL_GetError());
+    // Create a surface to detect the grid
+    SDL_Surface* image = load_image(argv[1]);
+    if (image == NULL)
+        errx(EXIT_FAILURE, "%s", SDL_GetError());
+    // create a texture to draw on
+    SDL_Texture* targetTexture = SDL_CreateTexture(renderer,
+            SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, image->w,
+            image->h);
+    // create a texture to draw reduced lines
+    SDL_Texture* targetLinesTexture = SDL_CreateTexture(renderer,
+            SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, image->w,
+            image->h);
+    // create a texture to draw the square of the grid
+    SDL_Texture* gridTexture = SDL_CreateTexture(renderer,
+            SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, image->w,
+            image->h);
+
+
+    // the drawing & saving part.
+    // set the target texture
+    SDL_SetRenderTarget(renderer, targetTexture);
+    SDL_RenderSetLogicalSize(renderer, image->w, image->h);
+
+    // Draw the original image onto the renderer
+    SDL_RenderCopy(renderer, imageTexture, NULL, NULL);
+
+    // Apply grid detection algorithm
+    List lines = houghtransform(image, renderer);
+    printf("all detected lines :\n");
+    printListOfLines(&lines);
+
+    // reset the target to the default renderer
+    SDL_SetRenderTarget(renderer, NULL);
+
+    // clear the screen
+    SDL_RenderClear(renderer);
+
+    // copy the image texture to the renderer
+    SDL_RenderCopy(renderer, targetTexture, NULL, NULL);
+
+    // Present the result
+    SDL_RenderPresent(renderer);
+
+    // Save the original image with lines drawn on it.
+    save_texture("houghtransform.png", renderer, targetTexture);
+
+
+    // reduced lines drawing part :
+    // reduce the lines
+    List* reducedlines = reduceLines(&lines);
+    printf("reduced lines :\n");
+    printListOfLines(reducedlines);
+
+    // clear the screen
+    SDL_RenderClear(renderer);
+
+    // Draw the original image on the renderer
+    SDL_RenderCopy(renderer, imageTexture, NULL, NULL);
+
+    // set the target
+    SDL_SetRenderTarget(renderer, targetLinesTexture);
+    SDL_RenderSetLogicalSize(renderer, image->w, image->h);
+
+    Node* node = reducedlines->head;
+
+    while (node != NULL)
+    {
+        // set the draw color to red.
+        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
+        Line* line = (Line *)node->value;
+
+        // draw the line
+        SDL_RenderDrawLine(renderer, line->X0, line->Y0, line->X1, line->Y1);
+
+        node = node->next;
+    }
+
+    save_texture("hough-reduced.png", renderer, targetLinesTexture);
+
+    List squarelist = findAllSquares(reducedlines, image->w, image->h);
+
+    Square sudokuGrid = FindBestSquare(&squarelist);
+
+    // set the target
+    SDL_SetRenderTarget(renderer, gridTexture);
+    SDL_RenderSetLogicalSize(renderer, image->w, image->h);
+
+    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+    Line l1 = sudokuGrid.top;
+    SDL_RenderDrawLine(renderer, l1.X0, l1.Y0, l1.X1, l1.Y1);
+    Line l2 = sudokuGrid.bot;
+    SDL_RenderDrawLine(renderer, l2.X0, l2.Y0, l2.X1, l2.Y1);
+    Line l3 = sudokuGrid.right;
+    SDL_RenderDrawLine(renderer, l3.X0, l3.Y0, l3.X1, l3.Y1);
+    Line l4 = sudokuGrid.left;
+    SDL_RenderDrawLine(renderer, l4.X0, l4.Y0, l4.X1, l4.Y1);
+
+    save_texture("grid.png", renderer, gridTexture);
+
+
+
+
+    /*
+    SDL_Surface* grid = SDL_CreateRGBSurface(0,
+            (int)(LineLength(&(sudokuGrid.top))),
+            (int)(LineLength(&(sudokuGrid.right))),
+            32, 0, 0, 0, 0);
+
+    SDL_Rect rect;
+    rect.x = sudokuGrid.top.X0;
+    rect.y = sudokuGrid.top.Y0;
+    rect.w = (int)(LineLength(&(sudokuGrid.top)));
+    rect.h = (int)(LineLength(&(sudokuGrid.right)));
+
+    SDL_BlitSurface(image, &rect, grid, NULL);
+
+    IMG_SavePNG(grid, "grid.png");
+    */
+
+
+
+    // Quit SDL
+    SDL_FreeSurface(image);
+    // SDL_FreeSurface(grid);
+    SDL_DestroyTexture(imageTexture);
+    SDL_DestroyTexture(targetTexture);
+    SDL_DestroyTexture(targetLinesTexture);
+    SDL_DestroyTexture(gridTexture);
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
+
+    freeList(&lines);
+    freeList(&squarelist);
+
+    return EXIT_SUCCESS;
+}

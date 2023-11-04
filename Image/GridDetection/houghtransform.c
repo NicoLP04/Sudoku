@@ -3,6 +3,20 @@
 
 #define THRESHOLD 0.5
 
+
+void* line2voidptr(Line line)
+{
+    void* ptr = malloc(sizeof(Line));
+
+    if (ptr == NULL)
+        errx(EXIT_FAILURE, "line2voidptr: malloc failed!");
+
+    *(Line *)ptr = line;
+
+    return ptr;
+}
+
+
 unsigned int** initMat(unsigned int x, unsigned int y)
 {
     unsigned int** mat = NULL;
@@ -41,22 +55,6 @@ double rad2deg(double radian)
 }
 
 
-SDL_Surface* load_image(const char* path)
-{
-	SDL_Surface* temp = IMG_Load(path);
-	if (temp == NULL)
-		errx(EXIT_FAILURE, "%s", SDL_GetError());
-
-    SDL_Surface* ret = SDL_ConvertSurfaceFormat(temp, SDL_PIXELFORMAT_RGB888,
-            0);
-	if (ret == NULL)
-		errx(EXIT_FAILURE, "%s", SDL_GetError());
-
-	SDL_FreeSurface(temp);
-
-	return ret;
-}
-
 void array_fill(double* arr, double len, double step, double maxVal,
         double minVal)
 {
@@ -66,7 +64,7 @@ void array_fill(double* arr, double len, double step, double maxVal,
 }
 
 
-void houghtransform(SDL_Surface* image, SDL_Renderer* draw_image)
+List houghtransform(SDL_Surface* image, SDL_Renderer* draw_image)
 {
 
     // image dimension
@@ -137,6 +135,8 @@ void houghtransform(SDL_Surface* image, SDL_Renderer* draw_image)
     int prev_rho = 0;
     int increase = 1;
 
+    List lines = { NULL, NULL, 0 };
+
 
     for (int theta = 0; theta <= arrlen; theta++)
     {
@@ -170,11 +170,8 @@ void houghtransform(SDL_Surface* image, SDL_Renderer* draw_image)
                 double r = arr_rhos[prev_rho];
                 double t = arr_theta[prev_theta];
 
-                // drawing the line on the draw image.
-
                 double c = cos(t);
                 double s = sin(t);
-
 
                 int x = (int)(c * r);
                 int y = (int)(s * r);
@@ -185,11 +182,26 @@ void houghtransform(SDL_Surface* image, SDL_Renderer* draw_image)
                 int x2 = x - (int)(diagonal * (-s));
                 int y2 = y - (int)(diagonal * c);
 
+                Line line;
+                line.X0 = x1;
+                line.Y0 = y1;
+                line.X1 = x2;
+                line.Y1 = y2;
+                line.theta = t;
 
-                // set draw color to magenta
-                SDL_SetRenderDrawColor(draw_image, 200, 0, 200, 255);
-                // draw the line
-                SDL_RenderDrawLine(draw_image, x1, y1, x2, y2);
+                void* p = line2voidptr(line);
+
+                appendValue(&lines, p);
+
+                int draw = 1;
+                if (draw)
+                {
+                    // set draw color to magenta
+                    SDL_SetRenderDrawColor(draw_image, 200, 0, 200, 255);
+                    // draw the line
+                    SDL_RenderDrawLine(draw_image, x1, y1, x2, y2);
+                }
+
             }
         }
     }
@@ -198,87 +210,6 @@ void houghtransform(SDL_Surface* image, SDL_Renderer* draw_image)
     free(arr_rhos);
     free(arr_theta);
     freeMat(accumulator, arrlen);
-}
 
-
-int main(int argc, char** argv)
-{
-    if (argc != 2)
-    {
-        printf("Error: expected 1 argument, got: %i\n", argc - 1);
-        printf("Usage: ./COMMAND <PATH>\n");
-        return EXIT_FAILURE;
-    }
-
-    // initialize the SDL
-    if (SDL_Init(SDL_INIT_VIDEO) != 0)
-        errx(EXIT_FAILURE, "%s", SDL_GetError());
-
-    // create widow
-    SDL_Window* window = SDL_CreateWindow("image display", 200, 200, 700, 700,
-            SDL_WINDOW_SHOWN);
-    if (window == NULL)
-        errx(EXIT_FAILURE, "%s", SDL_GetError());
-
-    // create a renderer
-    SDL_Renderer* renderer = SDL_CreateRenderer(window, -1,
-            SDL_RENDERER_ACCELERATED);
-    if (renderer == NULL)
-        errx(EXIT_FAILURE, "%s", SDL_GetError());
-
-    // load the image
-    SDL_Texture* imageTexture = IMG_LoadTexture(renderer, argv[1]);
-    if (imageTexture == NULL)
-        errx(EXIT_FAILURE, "%s", SDL_GetError());
-
-    // Create a surface to detect the grid
-    SDL_Surface* image = load_image(argv[1]);
-    if (image == NULL)
-        errx(EXIT_FAILURE, "%s", SDL_GetError());
-
-    // create a texture to draw on
-    SDL_Texture* targetTexture = SDL_CreateTexture(renderer,
-            SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, image->w,
-            image->h);
-
-    // set the target texture
-    SDL_SetRenderTarget(renderer, targetTexture);
-    SDL_RenderSetLogicalSize(renderer, image->w, image->h);
-
-    // Draw the original image onto the resultTexture
-    SDL_RenderCopy(renderer, imageTexture, NULL, NULL);
-
-    // Apply grid detection algorithm
-    houghtransform(image, renderer);
-
-    // reset the target to the default renderer
-    SDL_SetRenderTarget(renderer, NULL);
-
-    // clear the screen
-    SDL_RenderClear(renderer);
-
-    // copy the image texture to the renderer
-    SDL_RenderCopy(renderer, targetTexture, NULL, NULL);
-
-    // Present the result
-    SDL_RenderPresent(renderer);
-
-    int quit = 0;
-    SDL_Event e;
-    while (!quit)
-    {
-        while (SDL_PollEvent(&e) != 0)
-            if (e.type == SDL_QUIT)
-                quit = 1;
-    }
-
-    // Quit SDL
-    SDL_FreeSurface(image);
-    SDL_DestroyTexture(imageTexture);
-    SDL_DestroyTexture(targetTexture);
-    SDL_DestroyRenderer(renderer);
-    SDL_DestroyWindow(window);
-    SDL_Quit();
-
-    return EXIT_SUCCESS;
+    return lines;
 }
