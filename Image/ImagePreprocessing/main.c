@@ -11,7 +11,8 @@ SDL_Surface* load_image(const char* path)
 	if (temp == NULL)
 		errx(EXIT_FAILURE, "%s", SDL_GetError());
 
-	SDL_Surface* ret = SDL_ConvertSurfaceFormat(temp, SDL_PIXELFORMAT_RGB888, 0);
+	SDL_Surface* ret = SDL_ConvertSurfaceFormat(temp,
+			SDL_PIXELFORMAT_RGB888, 0);
 	if (ret == NULL)
 		errx(EXIT_FAILURE, "%s", SDL_GetError());
 
@@ -35,12 +36,12 @@ int main(int argc, char** argv)
 	SDL_Surface* s = load_image(argv[1]);
 	if (s == NULL)
     {
-        errx(EXIT_FAILURE, "%s", SDL_GetError()); 
+        errx(EXIT_FAILURE, "%s", SDL_GetError());
     }
-    //  - Transform the surface into grayscale   
+    //  - Transform the surface into grayscale
     printf("****Applying Grayscale*****\n") ;
 	surface_to_grayscale(s);
-    
+
     Uint8 seuil = getaverage(s);
 
     int histo[256] = {0};
@@ -54,7 +55,7 @@ int main(int argc, char** argv)
     {
         surface_to_seuillage(s,seuil+20);
     }
-    
+
     else if (seuil <175)
     {
         surface_to_seuillage(s,seuil-(255-seuil));
@@ -68,10 +69,10 @@ int main(int argc, char** argv)
         surface_to_seuillage(s,seuil-15);
     }
     else {surface_to_seuillage(s,123);}
-    
+
     //surface_to_invert(s);
     // - Save the image
-    
+
     surface_to_median(s);
     //surface_to_smooth(s); Issue on smooth
     //surface_to_median(s);
@@ -82,7 +83,7 @@ int main(int argc, char** argv)
 
     // - Free the surface.
     SDL_FreeSurface(s);
-	
+
 
     return EXIT_SUCCESS;
 }

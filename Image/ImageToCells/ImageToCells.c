@@ -26,7 +26,8 @@ SDL_Surface* extract(SDL_Surface *image)
 		for (size_t y = 0; y < height; y++)
 		{
 			Uint8 r, g, b;
-			SDL_GetRGB(imagePixels[y * width + xstart], image->format, &r, &g, &b);
+			SDL_GetRGB(imagePixels[y * width + xstart], image->format,
+					&r, &g, &b);
 			if (r <= l && g <= l && b <= l)
 				stop = 1;
 		}
@@ -40,7 +41,8 @@ SDL_Surface* extract(SDL_Surface *image)
 		for (size_t y = 0; y < height; y++)
 		{
 			Uint8 r, g, b;
-			SDL_GetRGB(imagePixels[y * width + xend], image->format, &r, &g, &b);
+			SDL_GetRGB(imagePixels[y * width + xend], image->format,
+					&r, &g, &b);
 			if (r <= l && g <= l && b <= l)
 				stop = 1;
 		}
@@ -54,7 +56,8 @@ SDL_Surface* extract(SDL_Surface *image)
 		for (size_t x = 0; x < width; x++)
 		{
 			Uint8 r, g, b;
-			SDL_GetRGB(imagePixels[ystart * width + x], image->format, &r, &g, &b);
+			SDL_GetRGB(imagePixels[ystart * width + x], image->format,
+					&r, &g, &b);
 			if (r <= l && g <= l && b <= l)
 				stop = 1;
 		}
@@ -68,7 +71,8 @@ SDL_Surface* extract(SDL_Surface *image)
 		for (size_t x = 0; x < width; x++)
 		{
 			Uint8 r, g, b;
-			SDL_GetRGB(imagePixels[yend * width + x], image->format, &r, &g, &b);
+			SDL_GetRGB(imagePixels[yend * width + x], image->format,
+					&r, &g, &b);
 			if (r <= l && g <= l && b <= l)
 				stop = 1;
 		}
@@ -147,7 +151,8 @@ void split(SDL_Surface *image)
         {
             if (y + yincrem <= height && x + xincrem <= width)
             {
-		SDL_Surface *cell = SDL_CreateRGBSurface(0, xincrem, yincrem, 32,0,0,0,0);
+		SDL_Surface *cell = SDL_CreateRGBSurface(0, xincrem, yincrem,
+				32,0,0,0,0);
 		Uint32* cellPixels = cell->pixels;
 
 		// copy pixels
@@ -155,7 +160,8 @@ void split(SDL_Surface *image)
     		{
      			for (size_t b = y; b < y + yincrem; b++)
         		{
-         			cellPixels[(b - y) * xincrem + a-x] = imagePixels[b * width + a];
+         			cellPixels[(b - y) * xincrem + a-x] =
+						imagePixels[b * width + a];
         		}
     		}
 

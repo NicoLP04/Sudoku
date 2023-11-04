@@ -26,7 +26,7 @@ Uint8 getaverage(SDL_Surface* surface)
 		sum += getpixelsum(pixels[i],format) ;
 	SDL_UnlockSurface(surface);
 	return (Uint8)(sum/len);
-	
+
 }
 
 int* gethistogram(SDL_Surface* surface,int* tab)
@@ -45,7 +45,7 @@ int* gethistogram(SDL_Surface* surface,int* tab)
 		SDL_GetRGB(pixels[i],surface->format,&rgb1.r,&rgb1.g,&rgb1.b) ;
 		tab[rgb1.r]++;
 	}
-		
+
 
 	SDL_UnlockSurface(surface);
 	return tab;

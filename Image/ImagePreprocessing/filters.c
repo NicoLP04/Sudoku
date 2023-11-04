@@ -31,7 +31,8 @@ void surface_to_grayscale(SDL_Surface* surface)
 
 // ***************      SEUILLAGE    *****************
 
-static Uint32 pixel_to_seuillage(Uint32 pixel_color, Uint8 seuil,SDL_PixelFormat* format)
+static Uint32 pixel_to_seuillage(Uint32 pixel_color, Uint8 seuil,
+		SDL_PixelFormat* format)
 {
 	Uint8 r, g, b;
 	SDL_GetRGB(pixel_color, format, &r, &g, &b);
@@ -41,7 +42,7 @@ static Uint32 pixel_to_seuillage(Uint32 pixel_color, Uint8 seuil,SDL_PixelFormat
     {
         average=0;
     }
-    else 
+    else
     {
         average =255;
     }
@@ -100,22 +101,24 @@ void surface_to_median(SDL_Surface* surface)
 	Uint32* pixels = surface ->pixels;
 	size_t w = surface-> w ;
 	size_t h = surface->h ;
-	
+
 	int err = SDL_LockSurface(surface);
 	if(err!=0)
 		errx(EXIT_FAILURE, "%s", SDL_GetError());
 
-	
+
 	for (size_t i = 1 ; i <h-1;i++)
 	{
 		for (size_t j = 1 ; j<w -1;j++)
 		{
-			Uint32 mat[] = {pixels[(i-1)*w+j-1],pixels[(i-1)*w+j],pixels[(i-1)*w+j+1],pixels[i*w+j-1],pixels[i*w+j],pixels[i*w+j+1],pixels[(i+1)*w+j-1],pixels[(i+1)*w+j],pixels[(i+1)*w+j+1]};
+			Uint32 mat[] = {pixels[(i-1)*w+j-1],pixels[(i-1)*w+j],
+				pixels[(i-1)*w+j+1],pixels[i*w+j-1],pixels[i*w+j],
+				pixels[i*w+j+1],pixels[(i+1)*w+j-1],pixels[(i+1)*w+j],
+				pixels[(i+1)*w+j+1]};
 			for (size_t k=0; k<8;k++)
 			{
 				for(size_t l = k+1;l<9;l++)
 				{
-					
 					SDL_Color rgb1;
 					SDL_Color rgb2;
 					SDL_GetRGB(mat[k],surface->format,&rgb1.r,&rgb1.g,&rgb1.b);
@@ -130,57 +133,59 @@ void surface_to_median(SDL_Surface* surface)
 			}
 			pixels[i*w+j]=mat[4];
 		}
-	} 
+	}
 }
 
 
 // ***************      SMOOTH    *****************
 
-//Issue : put the image in blue 
+//Issue : put the image in blue
 
 void surface_to_smooth(SDL_Surface* surface)
 {
 	Uint32* pixels = surface ->pixels;
 	size_t w = surface-> w ;
 	size_t h = surface->h ;
-	
+
 	int err = SDL_LockSurface(surface);
 	if(err!=0)
 		errx(EXIT_FAILURE, "%s", SDL_GetError());
 
-	
+
 	for (size_t i = 1 ; i <h-1;i++)
 	{
 		for (size_t j = 1 ; j<w -1;j++)
 		{
 			Uint32 temp = 0;
-			Uint32 mat[] = {pixels[(i-1)*w+j-1],pixels[(i-1)*w+j],pixels[(i-1)*w+j+1],pixels[i*w+j-1],pixels[i*w+j],pixels[i*w+j+1],pixels[(i+1)*w+j-1],pixels[(i+1)*w+j],pixels[(i+1)*w+j+1]};
+			Uint32 mat[] = {pixels[(i-1)*w+j-1],pixels[(i-1)*w+j],
+				pixels[(i-1)*w+j+1],pixels[i*w+j-1],pixels[i*w+j],
+				pixels[i*w+j+1],pixels[(i+1)*w+j-1],pixels[(i+1)*w+j],
+				pixels[(i+1)*w+j+1]};
 			for (size_t k=0; k<9;k++)
 			{
-				
 				SDL_Color rgb1;
 				SDL_GetRGB(mat[k],surface->format,&rgb1.r,&rgb1.g,&rgb1.b);
 				temp+=rgb1.r;
-				
 			}
 			pixels[i*w+j]=(Uint32)(temp/9);
 		}
-	} 
+	}
 }
 
 
 
 // ***************      CONTRAST    *****************
 
-static Uint32 pixel_to_contrast(Uint32 pixel_color, SDL_PixelFormat* format,int* histogram,int len)
+static Uint32 pixel_to_contrast(Uint32 pixel_color, SDL_PixelFormat* format,
+		int* histogram,int len)
 {
 	Uint8 r, g, b;
 	SDL_GetRGB(pixel_color, format, &r, &g, &b);
 
 	double temp = (double)histogram[r]/(double)len;
-	
+
 	double val = r*(259*(temp+255))/(255*(259-temp));
-	
+
 	return SDL_MapRGB(format, val, val, val);
 }
 
