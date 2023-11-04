@@ -8,13 +8,13 @@ OCR Sudoku Solver by Team Prague
 
 - Clone the repo
 
-- Execute ``make`` whenever there is a Makefile to use the scripts of its directory
+- Execute ``make`` at the root of the repository
 
 ## Usage
 
 ### SudokuSolver
 ```sh
-./solver grille_00     # Resolved grid is in a new created file grille00.result
+./solver grille_00     # Solved grid is in a new created file grille00.result
 ```
 
 ### NeuralNetwork
@@ -26,4 +26,19 @@ OCR Sudoku Solver by Team Prague
 ### Image/ImageToCells
 ```sh
 ./ImageToCells grille.png     # cells are saved in the directory named Cells/
+```
+
+### Image/ImagePreprocessing
+```sh
+./PreProcessing ../ImageExamples/image_01.jpeg     # result named image.jpeg
+```
+
+### Image/Rotation
+```sh
+./rotate ../ImageExamples/image_01.jpeg 37     # result named rotated.png
+```
+
+### Image/GridDetection
+```sh
+./GridDetection ../ImageExamples/image_01.jpeg
 ```
