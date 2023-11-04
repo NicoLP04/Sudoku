@@ -8,73 +8,56 @@ SDL_Surface* resizeImage(SDL_Surface* originalSurface,
 int newWidth, int newHeight)
 {
     if (originalSurface == NULL)
-{
         return NULL;
-    }
-
-    // Create a new surface with the desired width and height
     SDL_Surface* resizedSurface = SDL_CreateRGBSurfaceWithFormat(0, newWidth,
-newHeight,
-originalSurface->format->BitsPerPixel, originalSurface->format->format);
-    if (resizedSurface == NULL) {
+    newHeight, originalSurface->format->BitsPerPixel,
+    originalSurface->format->format);
+
+    if (resizedSurface == NULL)
+    {
         printf("Unable to create resized surface! SDL Error: %s\n",
-SDL_GetError());
+        SDL_GetError());
         return NULL;
     }
-
-    // Use SDL's scaling function to resize the image
-    if (SDL_BlitScaled(originalSurface, NULL, resizedSurface, NULL) != 0) {
+    if (SDL_BlitScaled(originalSurface, NULL, resizedSurface, NULL) != 0)
+    {
         printf("Unable to scale image! SDL Error: %s\n", SDL_GetError());
         return NULL;
     }
-
     return resizedSurface;
 }
 
-int main(int argc, char* args[]) {
-    if (argc != 4) {
-        printf("Usage: %s <image_file> <width> <height>\n", args[0]);
-        return 1;
+int main(int argc, char* args[])
+{
+    if (argc != 4)
+    {
+        errx(EXIT_FAILURE, "Usage: %s image-file / width / height",  args[0]);
     }
-
     // Initialize SDL
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) {
-        printf("SDL could not initialize! SDL Error: %s\n", SDL_GetError());
-        return 1;
-    }
+    if (SDL_Init(SDL_INIT_VIDEO) < 0)
+	    errx(EXIT_FAILURE, "%s", SDL_GetError());
 
     // Initialize SDL_image for image loading
-    if (!(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG)) {
-        printf("SDL_image could not initialize! SDL_image Error: %s\n",
-IMG_GetError());
-        return 1;
-    }
+    if (!(IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG))
+	    errx(EXIT_FAILURE, "%s", SDL_GetError());
 
-    // Load the original image
     SDL_Surface* originalSurface = IMG_Load(args[1]);
-    if (originalSurface == NULL) {
-        printf("Unable to load image from '%s'! SDL_image Error: %s\n",
-args[1], IMG_GetError());
-        return 1;
+    if (originalSurface == NULL)
+    {
+        errx(EXIT_FAILURE,
+        "Unable to load image from '%s'! SDL_image Error: %s\n",
+        args[1], IMG_GetError());
     }
-
-    // Get the desired width and height from command-line arguments
     int newWidth = atoi(args[2]);
     int newHeight = atoi(args[3]);
-
-    // Resize the image
     SDL_Surface* resizedSurface =
-resizeImage(originalSurface, newWidth, newHeight);
-
-    if (resizedSurface != NULL) {
-        // Save or display the resized image
+    resizeImage(originalSurface, newWidth, newHeight);
+    if (resizedSurface != NULL)
+    {
         IMG_SavePNG(resizedSurface, "resized.png");
-        // Clean up resources
         SDL_FreeSurface(originalSurface);
         SDL_FreeSurface(resizedSurface);
     }
-
-    // Quit SDL and SDL_image
     IMG_Quit();
     SDL_Quit();
     return 0;
