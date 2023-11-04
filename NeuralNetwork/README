@@ -1,7 +1,0 @@
-Pour compiler: make (make clean pour clean)
-si ca marche pas: /ff
-
-Pour utiliser:
-./NeuralNetwork --reset     -> reset le reseau de neurones
-./NeuralNetwork --train     -> train le reseau de neurones
-./NeuralNetwork --predict   -> predit les valeurs de la porte xor
