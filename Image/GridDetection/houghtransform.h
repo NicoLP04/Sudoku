@@ -34,9 +34,6 @@ double deg2rad(double degrees);
 // convert radian to degrees
 double rad2deg(double radian);
 
-// creates a SDL surface from a path
-SDL_Surface* load_image(const char* path);
-
 // fills the array arr of length len from minVal to maxVal incrementing
 // the values with step
 void array_fill(double* arr, double len, double step, double maxVal,
