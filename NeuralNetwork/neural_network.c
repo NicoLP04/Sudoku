@@ -1,74 +1,184 @@
-#include <stdlib.h>
-#include <stdio.h>
-#include <err.h>
-#include <string.h>
-#include <time.h>
-#include "xor.h"
+#include "neural_network.h"
 #include "maths_func.h"
 
 
-void exit_help()
-{
-	char help[] =
-		"Usage:\n"
-		"--predict\n"
-		"--train\n"
-		"--reset\n";
+/* global variables declarations */
 
-	errx(EXIT_FAILURE, "%s", help);
+// Nodes
+double hiddenLayer[numHiddens];
+double outputLayer[numOutputs];
+
+// Biases
+double hiddenLayerBias[numHiddens];
+double outputLayerBias[numOutputs];
+
+// Weights
+double hiddenWeights[numInputs][numHiddens];
+double outputWeights[numHiddens][numOutputs];
+
+
+// to delete
+SDL_Surface* load_image(const char* path)
+{
+    SDL_Surface* temp = IMG_Load(path);
+    if (temp  == NULL)
+        errx(EXIT_FAILURE, "%s", SDL_GetError());
+    SDL_Surface* newsurf = SDL_ConvertSurfaceFormat(temp,SDL_PIXELFORMAT_RGB888,0);
+    if (newsurf  == NULL)
+        errx(EXIT_FAILURE, "%s", SDL_GetError());
+    SDL_FreeSurface(temp);
+    return newsurf;
 }
 
-
-void predict_xor(int argc, char *file, char trainingInputs[4][2],
-    char trainingOutputs[4][1])
+// predict output
+double *predict(char i1, char i2, char *file)
 {
-	if (argc > 2)
-		exit_help();
+	load(file);
 
-	for (size_t j = 0; j < 4; j++)
+	char inputs[2] = { i1, i2 };
+
+	for (size_t k = 0; k < numHiddens; k++)
 	{
-		double o = predict(trainingInputs[j][0],trainingInputs[j][1],file)[0];
-		int r = 0;
-		if (o > 0.5f)
-			r = 1;
-		printf("For input [%hhi, %hhi] expected %hhi, predicted %d (%f)\n",
-			trainingInputs[j][0], trainingInputs[j][1],
-			trainingOutputs[j][0], r, o);
-	}
-}
-
-
-void train_xor(int argc, char** argv, char *file, char trainingInputs[4][2],
-    char trainingOutputs[4][1])
-{
-	if (argc > 4)
-		exit_help();
-
-	int epochs = 100000;
-	double lr = 0.1f;
-	char *endptr;
-
-	if (argc >= 3)
-		epochs = atoi(argv[2]);
-	if (argc == 4)
-	{
-		lr = strtod(argv[3], &endptr);
-		if (*endptr != 0)
-			exit_help();
+		double activation = hiddenLayerBias[k];
+		for (size_t l = 0; l < numInputs; l++)
+			activation += hiddenWeights[l][k] * inputs[l];
+		hiddenLayer[k] = relu(activation);
 	}
 
-	train(epochs, lr, trainingInputs, trainingOutputs, file);
+	for (size_t k = 0; k < numOutputs; k++)
+	{
+		double activation = outputLayerBias[k];
+		for (size_t l = 0; l < numHiddens; l++)
+			activation += outputWeights[l][k] * hiddenLayer[l];
+		outputLayer[k] = sigmoid(activation);
+	}
 
-	printf("Neural network successfully trained with parameters: \n");
-	printf("epochs = %d && lr = %f\n", epochs, lr);
+	return outputLayer;
 }
 
 
-void reset_xor(int argc, char *file)
+// train neural network
+void train(long epochs, double lr, char *file)
 {
-	if (argc > 2)
-		exit_help();
+	init_weights();
 
+	size_t numImages = 9;
+	size_t batch_size = 9;
+	
+	// Get all the images from the training set of (TrainingSet/)
+	char **images = malloc(numImages * sizeof(char*));
+	char **temp = images;
+	DIR *d;
+  	struct dirent *dir;
+  	d = opendir("TrainingSet/");
+  	if (d)
+	{
+		while ((dir = readdir(d)) != NULL)
+		{
+			if (dir->d_type == DT_REG)
+			{
+				*temp = calloc(25, sizeof(char));
+				strcat(*temp, "TrainingSet/");
+				strcat(*temp, dir->d_name);
+				temp++;
+			}
+    		}
+		closedir(d);
+	}
+
+	// loop to train the neural network
+	for (long i = 1; i < epochs + 1; i++)
+	{
+		size_t indexes[numImages];
+		for (size_t b = 0; b < numImages; b++)
+			indexes[b] = b;
+
+		shuffle(indexes, numImages);
+		
+		for (size_t j = 0; j < numImages; j++)
+		{
+			// get training set and target output
+			char *name = images[indexes[j]];
+			SDL_Surface *image = load_image(name);
+
+			double inputs[numInputs] = { 0 };
+			Uint32 *pixels = image->pixels;
+			for (int b = 0; b < image->h; b++)
+			{
+				for (int a = 0; a < image->w; a++)
+				{
+					Uint32 pixelValue = pixels[b * image->w + a];
+					Uint8 r, g, t;
+					SDL_GetRGB(pixelValue, image->format, &r, &g, &t);
+					inputs[b * image->w + a] = r;
+				}
+			}
+
+			double targets[numOutputs] = { 0 };
+			targets[*(name+12) - '1'] = 1;
+			
+			// feed forward
+			for (size_t k = 0; k < numHiddens; k++)
+			{
+				double activation = hiddenLayerBias[k];
+				for (size_t l = 0; l < numInputs; l++)
+					activation += hiddenWeights[l][k] * inputs[l];
+				hiddenLayer[k] = relu(activation);
+			}
+
+			for (size_t k = 0; k < numOutputs; k++)
+			{
+				double activation = outputLayerBias[k];
+				for (size_t l = 0; l < numHiddens; l++)
+					activation += outputWeights[l][k] * hiddenLayer[l];
+				outputLayer[k] = sigmoid(activation);
+			}
+
+
+			// backpropagation
+			double derrors[numOutputs];
+			for (size_t k = 0; k < numOutputs; k++)
+				derrors[k] = (targets[k] - outputLayer[k]) * sigmoid_prime(outputLayer[k]);
+
+			double dhidden[numHiddens];
+			for (size_t k = 0; k < numHiddens; k++)
+			{
+				double error = 0.0f;
+				for (size_t l = 0; l < numOutputs; l++)
+					error += derrors[l] * outputWeights[k][l];
+				dhidden[k] = error * relu_prime(hiddenLayer[k]);
+			}
+
+			// Apply change
+			for (size_t k = 0; k < numOutputs; k++)
+			{
+				outputLayerBias[k] += derrors[k] * lr;
+				for (size_t l = 0; l < numHiddens; l++)
+					outputWeights[l][k] += hiddenLayer[l] * derrors[k] * lr;
+			}
+			for (size_t k = 0; k < numHiddens; k++)
+			{
+				hiddenLayerBias[k] += dhidden[k] * lr;
+				for (size_t l = 0; l < numInputs; l++)
+					hiddenWeights[l][k] += inputs[l] * dhidden[k] * lr;
+			}
+
+			SDL_FreeSurface(image);
+		}
+	}
+
+
+	// free
+	for (size_t i = 0; i < numImages; i++)
+		free(images[i]);
+	free(images);
+
+	save(file);
+}
+
+// save weights and biases in file
+void save(char *file)
+{
 	FILE *f;
 
 	f = fopen(file,"w");
@@ -84,67 +194,89 @@ void reset_xor(int argc, char *file)
 
 	// write biases
 	for (size_t i = 0; i < numHiddens; i++)
-		fprintf(f, "%f|", 0.0f);
+		fprintf(f, "%f|", hiddenLayerBias[i]);
 	fprintf(f, "\n");
 	for (size_t i = 0; i < numOutputs; i++)
-		fprintf(f, "%f|", 0.0f);
+		fprintf(f, "%f|", outputLayerBias[i]);
 	fprintf(f, "\n\n");
 
 	// write weights
 	for (size_t i = 0; i < numHiddens; i++)
 	{
 		for (size_t j = 0; j < numInputs; j++)
-		{
-			double val = randomDbl();
-			fprintf(f, "%f|", val);
-		}
+			fprintf(f, "%f|", hiddenWeights[j][i]);
 		fprintf(f, "\n");
 	}
 	fprintf(f, "\n");
 	for (size_t i = 0; i < numOutputs; i++)
 	{
 		for (size_t j = 0; j < numHiddens; j++)
-		{
-			double val = randomDbl();
-			fprintf(f, "%f|", val);
-		}
+			fprintf(f, "%f|", outputWeights[j][i]);
 		fprintf(f, "\n");
 	}
 
 	fclose(f);
-
-	printf("Neural network successfully reset !\n");
 }
 
 
-// main function
-int main(int argc, char **argv)
+// load weights and biases from file
+void load(char *file)
 {
-	if (argc == 1)
-		exit_help();
+	FILE *f;
 
-	srand(time(NULL));
+	double a;
+        f = fopen(file, "r");
 
-	// Training dataset
-	char trainingOutputs[4][1] = { {0}, {1}, {1}, {0} };
-	char trainingInputs[4][2] = {
-		{ 0, 0 },
-		{ 1, 0 },
-		{ 0, 1 },
-		{ 1, 1 }
-	};
+	for (size_t k = 0; k < 3; k++)
+		fscanf(f, "%lf|", &a);
 
-	if (strcmp(argv[1], "--predict") == 0)
-		predict_xor(argc, "values", trainingInputs, trainingOutputs);
-	else if (strcmp(argv[1], "--train") == 0)
-		train_xor(argc, argv, "values", trainingInputs, trainingOutputs);
-	else if (strcmp(argv[1], "--reset") == 0)
-		reset_xor(argc, "values");
-	else
-		exit_help();
+	// get hidden biases
+	for (size_t k = 0; k < numHiddens; k++)
+	{
+		fscanf(f, "%lf|", &a);
+		hiddenLayerBias[k] = a;
+	}
+	// get output biases
+	for (size_t k = 0; k < numOutputs; k++)
+	{
+		fscanf(f, "%lf|", &a);
+		outputLayerBias[k] = a;
+	}
 
+	// get weights
+	for (size_t k = 0; k < numHiddens; k++)
+	{
+		for (size_t l = 0; l < numInputs; l++)
+		{
+			fscanf(f, "%lf|", &a);
+			hiddenWeights[l][k] = a;
+		}
+	}
+	for (size_t k = 0; k < numOutputs; k++)
+	{
+		for (size_t l = 0; l < numHiddens; l++)
+		{
+			fscanf(f, "%lf|", &a);
+			outputWeights[l][k] = a;
+		}
+	}
 
-	return EXIT_SUCCESS;
+        fclose(f);
 }
 
 
+// init weights with random values
+void init_weights()
+{
+	// Init Weights
+	for (size_t i = 0; i < numInputs; i++)
+		for (size_t j = 0; j < numHiddens; j++)
+			hiddenWeights[i][j] = randomDbl();
+	for (size_t i = 0; i < numHiddens; i++)
+		for (size_t j = 0; j < numOutputs; j++)
+			outputWeights[i][j] = randomDbl();
+	for (size_t i = 0; i < numHiddens; i++)
+		hiddenLayerBias[i] = 0;
+	for (size_t i = 0; i < numOutputs; i++)
+		outputLayerBias[i] = 0;
+}

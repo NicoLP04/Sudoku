@@ -3,9 +3,9 @@
 TARGET = NeuralNetwork
 CC = gcc
 CPPFLAGS = -MMD
-CFLAGS = -Wall -Wextra -O3 -g -fsanitize=address
-LDFLAGS = -fsanitize=address
-LDLIBS = -lm
+CFLAGS = -Wall -Wextra -O3 -g -fsanitize=address `pkg-config --cflags sdl2 SDL2_image` -D\_\_NO\_INLINE\_\_
+LDFLAGS = -fsanitize=address `pkg-config --cflags sdl2 SDL2_image` -lSDL2 -lSDL2_image
+LDLIBS = -lm `pkg-config --cflags sdl2 SDL2_image`
 
 SRC := $(shell find -name '*.c')
 OBJ = ${SRC:.c=.o}
