@@ -15,10 +15,10 @@
 
 
 // predict output based on inputs
-double *predict(char i1, char i2, char *file);
+double *predict(char *file, SDL_Surface *image);
 
 // train neural network
-void train(long epochs, double lr, char *file);
+void train(long epochs, double lr, char *file, size_t numImages, size_t batchSize);
 
 // save weights and biases to file
 void save(char *file);
@@ -28,3 +28,7 @@ void load(char *file);
 
 // init weights with random values
 void init_weights();
+
+void print_results(char *file);
+
+void reset(char *file);

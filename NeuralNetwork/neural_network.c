@@ -31,18 +31,30 @@ SDL_Surface* load_image(const char* path)
 }
 
 // predict output
-double *predict(char i1, char i2, char *file)
+double *predict(char *file, SDL_Surface *image)
 {
 	load(file);
 
-	char inputs[2] = { i1, i2 };
+	double inputs[numInputs] = { 0 };
+	Uint32 *pixels = image->pixels;
+	for (int b = 0; b < image->h; b++)
+	{
+		for (int a = 0; a < image->w; a++)
+		{
+			Uint32 pixelValue = pixels[b * image->w + a];
+			Uint8 r, g, t;
+			SDL_GetRGB(pixelValue, image->format, &r, &g, &t);
+			inputs[b * image->w + a] = r;
+		}
+	}
 
+	// Calculate outputs
 	for (size_t k = 0; k < numHiddens; k++)
 	{
 		double activation = hiddenLayerBias[k];
 		for (size_t l = 0; l < numInputs; l++)
 			activation += hiddenWeights[l][k] * inputs[l];
-		hiddenLayer[k] = relu(activation);
+		hiddenLayer[k] = sigmoid(activation);
 	}
 
 	for (size_t k = 0; k < numOutputs; k++)
@@ -57,28 +69,26 @@ double *predict(char i1, char i2, char *file)
 }
 
 
-// train neural network
-void train(long epochs, double lr, char *file)
+// train neural network with parameters epochs and lr
+void train(long epochs, double lr, char *file, size_t numImages, size_t batchSize)
 {
 	init_weights();
+	char *setName = "TrainingSet/LearningSet/";
 
-	size_t numImages = 9;
-	size_t batch_size = 9;
-	
 	// Get all the images from the training set of (TrainingSet/)
 	char **images = malloc(numImages * sizeof(char*));
 	char **temp = images;
 	DIR *d;
   	struct dirent *dir;
-  	d = opendir("TrainingSet/");
+  	d = opendir(setName);
   	if (d)
 	{
 		while ((dir = readdir(d)) != NULL)
 		{
 			if (dir->d_type == DT_REG)
 			{
-				*temp = calloc(25, sizeof(char));
-				strcat(*temp, "TrainingSet/");
+				*temp = calloc(35, sizeof(char));
+				strcat(*temp, setName);
 				strcat(*temp, dir->d_name);
 				temp++;
 			}
@@ -115,15 +125,15 @@ void train(long epochs, double lr, char *file)
 			}
 
 			double targets[numOutputs] = { 0 };
-			targets[*(name+12) - '1'] = 1;
-			
+			targets[*(name+24) - '1'] = 1;
+
 			// feed forward
 			for (size_t k = 0; k < numHiddens; k++)
 			{
 				double activation = hiddenLayerBias[k];
 				for (size_t l = 0; l < numInputs; l++)
 					activation += hiddenWeights[l][k] * inputs[l];
-				hiddenLayer[k] = relu(activation);
+				hiddenLayer[k] = sigmoid(activation);
 			}
 
 			for (size_t k = 0; k < numOutputs; k++)
@@ -131,14 +141,34 @@ void train(long epochs, double lr, char *file)
 				double activation = outputLayerBias[k];
 				for (size_t l = 0; l < numHiddens; l++)
 					activation += outputWeights[l][k] * hiddenLayer[l];
-				outputLayer[k] = sigmoid(activation);
+				outputLayer[k] = activation;		//sigmoid(activation);
 			}
 
+			// WITH SOFTMAX
+			double max_val = outputLayer[0];
+    			for (int i = 1; i < numOutputs; i++) {
+				if (outputLayer[i] > max_val) {
+					max_val = outputLayer[i];
+				}
+			}
+			double sum = 0;
+			for (size_t k = 0; k < numOutputs; k++)
+			{
+				outputLayer[k] = exp(outputLayer[k] - max_val);
+				sum += outputLayer[k];
+    			}
+
+			for (size_t k = 0; k < numOutputs; k++)
+			{
+			        outputLayer[k] /= sum;
+			}
+
+			//softmax(outputLayer, numOutputs);
 
 			// backpropagation
 			double derrors[numOutputs];
 			for (size_t k = 0; k < numOutputs; k++)
-				derrors[k] = (targets[k] - outputLayer[k]) * sigmoid_prime(outputLayer[k]);
+				derrors[k] = (targets[k] - outputLayer[k]); 	//* sigmoid_prime(outputLayer[k]);
 
 			double dhidden[numHiddens];
 			for (size_t k = 0; k < numHiddens; k++)
@@ -146,16 +176,10 @@ void train(long epochs, double lr, char *file)
 				double error = 0.0f;
 				for (size_t l = 0; l < numOutputs; l++)
 					error += derrors[l] * outputWeights[k][l];
-				dhidden[k] = error * relu_prime(hiddenLayer[k]);
+				dhidden[k] = error * sigmoid_prime(hiddenLayer[k]);
 			}
 
 			// Apply change
-			for (size_t k = 0; k < numOutputs; k++)
-			{
-				outputLayerBias[k] += derrors[k] * lr;
-				for (size_t l = 0; l < numHiddens; l++)
-					outputWeights[l][k] += hiddenLayer[l] * derrors[k] * lr;
-			}
 			for (size_t k = 0; k < numHiddens; k++)
 			{
 				hiddenLayerBias[k] += dhidden[k] * lr;
@@ -163,6 +187,15 @@ void train(long epochs, double lr, char *file)
 					hiddenWeights[l][k] += inputs[l] * dhidden[k] * lr;
 			}
 
+			
+			for (size_t k = 0; k < numOutputs; k++)
+			{
+				outputLayerBias[k] += derrors[k] * lr;
+				for (size_t l = 0; l < numHiddens; l++)
+					outputWeights[l][k] += hiddenLayer[l] * derrors[k] * lr;
+			}
+			
+			
 			SDL_FreeSurface(image);
 		}
 	}
@@ -280,3 +313,114 @@ void init_weights()
 	for (size_t i = 0; i < numOutputs; i++)
 		outputLayerBias[i] = 0;
 }
+
+
+void print_results(char *file)
+{
+	char *setName = "TrainingSet/TestSet/";
+	size_t numImages = 9;
+
+	// Get all the images from the training set of (TrainingSet/)
+	char **images = malloc(numImages * sizeof(char*));
+	char **temp = images;
+	DIR *d;
+  	struct dirent *dir;
+  	d = opendir(setName);
+  	if (d)
+	{
+		while ((dir = readdir(d)) != NULL)
+		{
+			if (dir->d_type == DT_REG)
+			{
+				*temp = calloc(35, sizeof(char));
+				strcat(*temp, setName);
+				strcat(*temp, dir->d_name);
+				printf("%s\n", *temp);
+				temp++;
+			}
+    		}
+		closedir(d);
+	}
+
+	for (size_t i = 0; i < 9; i++)
+	{
+		char *name = images[i];
+		SDL_Surface *image = load_image(name);
+		double *results = predict(file, image);
+		
+		double max = results[0];
+		size_t jmax = 0;
+		printf("For image %s, output is:\n{", name);
+		for (size_t j = 0; j < 8; j++)
+		{
+			printf(" %f,", results[j]);
+			if (results[j] > max)
+			{
+				jmax = j;
+				max = results[j];
+			}
+		}
+		jmax++;
+		printf(" %f }\n", results[8]);
+		int exp = *(name+20) - '0';
+		printf(" --> Expected %d, Predicted %ld\n\n", exp, jmax);
+
+		SDL_FreeSurface(image);
+	}
+	
+	// free
+	for (size_t i = 0; i < numImages; i++)
+		free(images[i]);
+	free(images);
+}
+
+
+void reset(char *file)
+{
+	FILE *f;
+
+	f = fopen(file,"w");
+
+	if(f == NULL)
+	{
+		printf("Error!");
+		exit(1);
+	}
+
+	// write number of Nodes I|H|O
+	fprintf(f,"%d|%d|%d\n\n", numInputs, numHiddens, numOutputs);
+
+	// write biases
+	for (size_t i = 0; i < numHiddens; i++)
+		fprintf(f, "%f|", 0.0f);
+	fprintf(f, "\n");
+	for (size_t i = 0; i < numOutputs; i++)
+		fprintf(f, "%f|", 0.0f);
+	fprintf(f, "\n\n");
+
+	// write weights
+	for (size_t i = 0; i < numHiddens; i++)
+	{
+		for (size_t j = 0; j < numInputs; j++)
+		{
+			double val = randomDbl();
+			fprintf(f, "%f|", val);
+		}
+		fprintf(f, "\n");
+	}
+	fprintf(f, "\n");
+	for (size_t i = 0; i < numOutputs; i++)
+	{
+		for (size_t j = 0; j < numHiddens; j++)
+		{
+			double val = randomDbl();
+			fprintf(f, "%f|", val);
+		}
+		fprintf(f, "\n");
+	}
+
+	fclose(f);
+
+	printf("Neural network successfully reset !\n");
+}
+
