@@ -56,8 +56,18 @@ double relu_prime(double x)
 
 
 // softmax function
-double softmax(double x)
+void softmax(double *input, double *output, size_t size)
 {
-	return exp(x) / (1 + exp(x));
+	double sum = 0;
+	for (size_t k = 0; k < size; k++)
+	{
+		output[k] = exp(input[k]);
+		sum += output[k];
+	}
+
+	for (size_t k = 0; k < size; k++)
+	{
+		output[k] /= sum;
+	}
 }
 

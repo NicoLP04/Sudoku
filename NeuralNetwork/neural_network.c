@@ -62,9 +62,10 @@ double *predict(char *file, SDL_Surface *image)
 		double activation = outputLayerBias[k];
 		for (size_t l = 0; l < numHiddens; l++)
 			activation += outputWeights[l][k] * hiddenLayer[l];
-		outputLayer[k] = sigmoid(activation);
+		outputLayer[k] = activation;	//sigmoid(activation);
 	}
 
+	softmax(outputLayer, outputLayer, numOutputs);
 	return outputLayer;
 }
 
@@ -144,26 +145,7 @@ void train(long epochs, double lr, char *file, size_t numImages, size_t batchSiz
 				outputLayer[k] = activation;		//sigmoid(activation);
 			}
 
-			// WITH SOFTMAX
-			double max_val = outputLayer[0];
-    			for (int i = 1; i < numOutputs; i++) {
-				if (outputLayer[i] > max_val) {
-					max_val = outputLayer[i];
-				}
-			}
-			double sum = 0;
-			for (size_t k = 0; k < numOutputs; k++)
-			{
-				outputLayer[k] = exp(outputLayer[k] - max_val);
-				sum += outputLayer[k];
-    			}
-
-			for (size_t k = 0; k < numOutputs; k++)
-			{
-			        outputLayer[k] /= sum;
-			}
-
-			//softmax(outputLayer, numOutputs);
+			softmax(outputLayer, outputLayer, numOutputs);
 
 			// backpropagation
 			double derrors[numOutputs];
@@ -351,7 +333,7 @@ void print_results(char *file)
 		double max = results[0];
 		size_t jmax = 0;
 		printf("For image %s, output is:\n{", name);
-		for (size_t j = 0; j < 8; j++)
+		for (size_t j = 0; j < 9; j++)
 		{
 			printf(" %f,", results[j]);
 			if (results[j] > max)

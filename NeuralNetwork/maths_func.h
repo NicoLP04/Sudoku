@@ -24,5 +24,5 @@ double relu(double x);
 double relu_prime(double x);
 
 // softmax function
-double softmax(double x);
+void softmax(double *input, double *output, size_t size);
 
