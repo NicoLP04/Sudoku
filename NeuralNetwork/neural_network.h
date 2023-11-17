@@ -10,7 +10,7 @@
 
 // Number of Nodes
 #define numInputs 784
-#define numHiddens 15
+#define numHiddens 150
 #define numOutputs 9
 
 

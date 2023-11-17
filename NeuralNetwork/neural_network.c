@@ -169,15 +169,12 @@ void train(long epochs, double lr, char *file, size_t numImages, size_t batchSiz
 					hiddenWeights[l][k] += inputs[l] * dhidden[k] * lr;
 			}
 
-			
 			for (size_t k = 0; k < numOutputs; k++)
 			{
 				outputLayerBias[k] += derrors[k] * lr;
 				for (size_t l = 0; l < numHiddens; l++)
 					outputWeights[l][k] += hiddenLayer[l] * derrors[k] * lr;
 			}
-			
-			
 			SDL_FreeSurface(image);
 		}
 	}
@@ -343,9 +340,9 @@ void print_results(char *file)
 			}
 		}
 		jmax++;
-		printf(" %f }\n", results[8]);
+		printf(" }\n");
 		int exp = *(name+20) - '0';
-		printf(" --> Expected %d, Predicted %ld\n\n", exp, jmax);
+		printf(" --> Expected %d, Predicted %ld (%f)\n\n", exp, jmax, max);
 
 		SDL_FreeSurface(image);
 	}
