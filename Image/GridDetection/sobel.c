@@ -1,5 +1,7 @@
 #include "sobel.h"
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
+#include <err.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -53,7 +55,48 @@ void applySobel(SDL_Surface *input, SDL_Surface *output)
 }
 
 
-int main(int argc, char *argv[])
+SDL_Surface* load_image(const char* path)
+{
+    SDL_Surface* temp = IMG_Load(path);
+    if (temp == NULL)
+    {
+        fprintf(stderr, "Error loading image: %s\n", SDL_GetError());
+        return NULL;
+    }
+
+    SDL_Surface* ret = SDL_ConvertSurfaceFormat(temp, SDL_PIXELFORMAT_RGB888, 0);
+    if (ret == NULL)
+    {
+        fprintf(stderr, "Error converting surface format: %s\n", SDL_GetError());
+        SDL_FreeSurface(temp);
+        return NULL;
+    }
+
+    SDL_FreeSurface(temp);
+
+    return ret;
+}
+
+
+
+void save_texture(const char* file_name, SDL_Renderer* renderer,
+        SDL_Texture* texture)
+{
+    SDL_Texture* target = SDL_GetRenderTarget(renderer);
+    SDL_SetRenderTarget(renderer, texture);
+    int width, height;
+    SDL_QueryTexture(texture, NULL, NULL, &width, &height);
+    SDL_Surface* surface = SDL_CreateRGBSurface(0, width, height, 32,
+            0, 0, 0, 0);
+    SDL_RenderReadPixels(renderer, NULL, surface->format->format,
+            surface->pixels, surface->pitch);
+    IMG_SavePNG(surface, file_name);
+    SDL_FreeSurface(surface);
+    SDL_SetRenderTarget(renderer, target);
+}
+
+
+int main(int argc, char **argv)
 {
     if (argc != 2)
     {
@@ -61,15 +104,22 @@ int main(int argc, char *argv[])
         return EXIT_FAILURE;
     }
 
+    printf("%s\n",argv[1]);
     char *filename = argv[1];
 
-    SDL_Init(SDL_INIT_VIDEO);
-
-    SDL_Surface *image = SDL_LoadBMP(filename);
-    if (image == NULL)
+    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_AUDIO | SDL_INIT_EVENTS | SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC | SDL_INIT_GAMECONTROLLER | SDL_INIT_SENSOR) < 0)
     {
-        fprintf(stderr, "Error loading image: %s\n", SDL_GetError());
-        SDL_Quit();
+        fprintf(stderr, "SDL initialization error: %s\n", SDL_GetError());
+        return EXIT_FAILURE;
+    }
+
+    printf("Before load_image\n");
+    SDL_Surface *image = load_image(filename);
+    printf("After load_image\n");
+
+    if (!image)
+    {
+        fprintf(stderr, "Error loading image\n");
         return EXIT_FAILURE;
     }
 
@@ -81,13 +131,29 @@ int main(int argc, char *argv[])
     SDL_Window *window = SDL_CreateWindow("Sobel Edge Detection",
         SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, image->w, image->h,
         SDL_WINDOW_SHOWN);
+    if (!window)
+    {
+        fprintf(stderr, "Error creating SDL window: %s\n", SDL_GetError());
+        return EXIT_FAILURE;
+    }
+
     SDL_Renderer *renderer =
         SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    if (!renderer)
+    {
+        fprintf(stderr, "Error creating SDL renderer: %s\n", SDL_GetError());
+        return EXIT_FAILURE;
+    }
+
+
     SDL_Texture *texture =
         SDL_CreateTextureFromSurface(renderer, output);
 
     SDL_RenderCopy(renderer, texture, NULL, NULL);
     SDL_RenderPresent(renderer);
+
+    // Save the output image using the save_texture function
+    save_texture("output.png", renderer, texture);
 
     SDL_Delay(3000);  // Wait for 3 seconds
 
