@@ -1,6 +1,6 @@
 #include "image.h"
 
-
+    
 SDL_Surface* load_image(const char* path)
 {
     SDL_Surface* temp = IMG_Load(path);

@@ -1,5 +1,6 @@
 #include "grid.h"
 #include "image.h"
+#include "sobel.h"
 
 #define DISTANCE 30
 #define SQUARE_DISTANCE 10
@@ -344,6 +345,11 @@ int main(int argc, char** argv)
             SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, image->w,
             image->h);
 
+    SDL_Surface *sobel =
+    SDL_CreateRGBSurface(0, image->w, image->h, 32, 0, 0, 0, 0);
+   
+    // apply sobel filter on image
+    applySobel(image, sobel);
 
     // the drawing & saving part.
     // set the target texture
@@ -354,7 +360,7 @@ int main(int argc, char** argv)
     SDL_RenderCopy(renderer, imageTexture, NULL, NULL);
 
     // Apply grid detection algorithm
-    List lines = houghtransform(image, renderer);
+    List lines = houghtransform(sobel, renderer);
     printf("all detected lines :\n");
     printListOfLines(&lines);
 
@@ -450,6 +456,7 @@ int main(int argc, char** argv)
 
     // Quit SDL
     SDL_FreeSurface(image);
+    SDL_FreeSurface(sobel);
     // SDL_FreeSurface(grid);
     SDL_DestroyTexture(imageTexture);
     SDL_DestroyTexture(targetTexture);
