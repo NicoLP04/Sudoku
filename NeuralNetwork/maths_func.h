@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <sys/time.h>
 
 
 // random number generator (between 0 and 1)
@@ -15,7 +16,7 @@ double sigmoid(double x);
 double sigmoid_prime(double x);
 
 // randomize array
-void shuffle(size_t s[], size_t n);
+void shuffle(size_t* array, size_t n);
 
 // relu function
 double relu(double x);

@@ -10,15 +10,15 @@
 
 // Number of Nodes
 #define numInputs 784
-#define numHiddens 150
-#define numOutputs 9
+#define numHiddens 120
+#define numOutputs 10
 
 
 // predict output based on inputs
-double *predict(char *file, SDL_Surface *image);
+int predict(SDL_Surface *image);
 
 // train neural network
-void train(long epochs, double lr, char *file, size_t numImages, size_t batchSize);
+void train(long epochs, double lr, char *file, size_t numImages);
 
 // save weights and biases to file
 void save(char *file);
@@ -29,6 +29,6 @@ void load(char *file);
 // init weights with random values
 void init_weights();
 
-void print_results(char *file);
+void print_results();
 
 void reset(char *file);

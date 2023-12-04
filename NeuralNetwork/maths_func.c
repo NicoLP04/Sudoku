@@ -21,17 +21,23 @@ double sigmoid_prime(double x)
 	return x * (1 - x);
 }
 
-
-// randomize array
-void shuffle(size_t s[], size_t n)
+void shuffle(size_t *array, size_t n)
 {
-	for (size_t i = 0; i < n - 1; i++)
-	{
-		size_t j = i + rand() / (RAND_MAX / (n - i) + 1);
-		char t = s[j];
-		s[j] = s[i];
-		s[i] = t;
-	}
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    int usec = tv.tv_usec;
+    srand48(usec);
+
+
+    if (n > 1) {
+        size_t i;
+        for (i = n - 1; i > 0; i--) {
+            size_t j = (unsigned int) (drand48()*(i+1));
+            size_t t = array[j];
+            array[j] = array[i];
+            array[i] = t;
+        }
+    }
 }
 
 

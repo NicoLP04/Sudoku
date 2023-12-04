@@ -31,15 +31,15 @@ int main(int argc, char **argv)
 	{
 		if (argc > 2)
 			exit_help();
-		print_results("values");
+		print_results();
 	}
 	else if (strcmp(argv[1], "--train") == 0)
 	{	
 		if (argc > 4)
 			exit_help();
 
-		int epochs = 10;
-		double lr = 0.1f;
+		int epochs = 100;
+		double lr = 0.001f;
 		char *endptr;
 	
 		if (argc >= 3)
@@ -51,7 +51,8 @@ int main(int argc, char **argv)
 				exit_help();
 		}
 	
-		train(epochs, lr, "values", 9, 9);
+    size_t num = 2850;
+		train(epochs, lr, "values", num);
 	
 		printf("Neural network successfully trained with parameters: \n");
 		printf("epochs = %d && lr = %f\n", epochs, lr);

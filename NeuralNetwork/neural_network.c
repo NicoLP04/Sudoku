@@ -31,9 +31,9 @@ SDL_Surface* load_image(const char* path)
 }
 
 // predict output
-double *predict(char *file, SDL_Surface *image)
+int predict(SDL_Surface *image)
 {
-	load(file);
+	load("values");
 
 	double inputs[numInputs] = { 0 };
 	Uint32 *pixels = image->pixels;
@@ -66,12 +66,21 @@ double *predict(char *file, SDL_Surface *image)
 	}
 
 	softmax(outputLayer, outputLayer, numOutputs);
-	return outputLayer;
+
+  int res = 0;
+  for (int i = 0; i < numOutputs; i++)
+  {
+    if (outputLayer[i] > outputLayer[res])
+      res = i;
+    printf("%f, ", outputLayer[i]);
+  }
+  printf(" -> %f\n", outputLayer[res]);
+	return res;
 }
 
 
 // train neural network with parameters epochs and lr
-void train(long epochs, double lr, char *file, size_t numImages, size_t batchSize)
+void train(long epochs, double lr, char *file, size_t numImages)
 {
 	init_weights();
 	char *setName = "TrainingSet/LearningSet/";
@@ -88,7 +97,7 @@ void train(long epochs, double lr, char *file, size_t numImages, size_t batchSiz
 		{
 			if (dir->d_type == DT_REG)
 			{
-				*temp = calloc(35, sizeof(char));
+				*temp = calloc(40, sizeof(char));
 				strcat(*temp, setName);
 				strcat(*temp, dir->d_name);
 				temp++;
@@ -109,7 +118,8 @@ void train(long epochs, double lr, char *file, size_t numImages, size_t batchSiz
 		for (size_t j = 0; j < numImages; j++)
 		{
 			// get training set and target output
-			char *name = images[indexes[j]];
+      size_t idx = indexes[j];
+			char *name = images[idx];
 			SDL_Surface *image = load_image(name);
 
 			double inputs[numInputs] = { 0 };
@@ -126,7 +136,7 @@ void train(long epochs, double lr, char *file, size_t numImages, size_t batchSiz
 			}
 
 			double targets[numOutputs] = { 0 };
-			targets[*(name+24) - '1'] = 1;
+			targets[*(name+24) - '0'] = 1;
 
 			// feed forward
 			for (size_t k = 0; k < numHiddens; k++)
@@ -294,10 +304,10 @@ void init_weights()
 }
 
 
-void print_results(char *file)
+void print_results()
 {
 	char *setName = "TrainingSet/TestSet/";
-	size_t numImages = 9;
+	size_t numImages = 10;
 
 	// Get all the images from the training set of (TrainingSet/)
 	char **images = malloc(numImages * sizeof(char*));
@@ -311,38 +321,24 @@ void print_results(char *file)
 		{
 			if (dir->d_type == DT_REG)
 			{
-				*temp = calloc(35, sizeof(char));
+				*temp = calloc(40, sizeof(char));
 				strcat(*temp, setName);
 				strcat(*temp, dir->d_name);
-				printf("%s\n", *temp);
 				temp++;
 			}
     		}
 		closedir(d);
 	}
 
-	for (size_t i = 0; i < 9; i++)
+	for (size_t i = 0; i < 10; i++)
 	{
 		char *name = images[i];
 		SDL_Surface *image = load_image(name);
-		double *results = predict(file, image);
-		
-		double max = results[0];
-		size_t jmax = 0;
-		printf("For image %s, output is:\n{", name);
-		for (size_t j = 0; j < 9; j++)
-		{
-			printf(" %f,", results[j]);
-			if (results[j] > max)
-			{
-				jmax = j;
-				max = results[j];
-			}
-		}
-		jmax++;
-		printf(" }\n");
+		int res = predict(image);
 		int exp = *(name+20) - '0';
-		printf(" --> Expected %d, Predicted %ld (%f)\n\n", exp, jmax, max);
+
+		printf("For image %s, ", name);
+		printf("Expected %d, Predicted %d\n\n", exp, res);
 
 		SDL_FreeSurface(image);
 	}
