@@ -1,4 +1,5 @@
 #include "grid.h"
+#include "image.h"
 
 #define DISTANCE 30
 #define SQUARE_DISTANCE 10
