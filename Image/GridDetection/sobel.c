@@ -107,7 +107,7 @@ int main(int argc, char **argv)
     printf("%s\n",argv[1]);
     char *filename = argv[1];
 
-    if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_AUDIO | SDL_INIT_EVENTS | SDL_INIT_JOYSTICK | SDL_INIT_HAPTIC | SDL_INIT_GAMECONTROLLER | SDL_INIT_SENSOR) < 0)
+    if (SDL_Init(SDL_INIT_VIDEO) < 0)
     {
         fprintf(stderr, "SDL initialization error: %s\n", SDL_GetError());
         return EXIT_FAILURE;
