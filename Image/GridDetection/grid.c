@@ -1,7 +1,10 @@
 #include "grid.h"
+#include "image.h"
+#include "sobel.h"
+#include "string.h"
+#include "stdio.h"
 
 #define DISTANCE 30
-#define SQUARE_DISTANCE 10
 
 int IsCloseEnoughLines(Line* a, Line* b)
 {
@@ -19,14 +22,37 @@ double LineLength(Line* l)
 }
 
 
-int IsCorrectSquare(Square* sqr)
+int IsCorrectSquare(Square* sqr, double SQUARE_DISTANCE)
 {
+
+	double lentop = LineLength(&(sqr->top));
+	double lenbot = LineLength(&(sqr->bot));
+	double lenright = LineLength(&(sqr->right));
+	double lenleft = LineLength(&(sqr->left));
+
+	double max = lentop > lenbot ? lentop : lenbot;
+	max = max > lenright ? max : lenright;
+	max = max > lenleft ? max : lenleft;
+
+	double min = lentop < lenbot ? lentop : lenbot;
+	min = min < lenright ? min : lenright;
+	min = min < lenleft ? min : lenleft;
+
+	double val = max - min;
+
+	if (val > SQUARE_DISTANCE)
+		return 0;
+
+	return 1;
+
+	/*
     return
         LineLength(&(sqr->top)) - LineLength(&(sqr->bot)) < SQUARE_DISTANCE
         &&
         LineLength(&(sqr->top)) - LineLength(&(sqr->right)) < SQUARE_DISTANCE
         &&
         LineLength(&(sqr->top)) - LineLength(&(sqr->left)) < SQUARE_DISTANCE;
+	*/
 }
 
 
@@ -180,7 +206,29 @@ Point findIntersection(Line* l1, Line* l2, int w, int h)
 }
 
 
-List findAllSquares(List* lines, int w, int h)
+double get_sqr_dst(char *path)
+{
+	int i;
+
+	for (i = strlen(path) - 1; i >= 0 && path[i] != '.'; --i)
+	;
+
+	if (path[i] == '.')
+		--i;
+
+	switch(path[i])
+	{
+		case '2' : return 20;
+		case '3' : return 10;
+		case '4' : return 40;
+		case '5' : return 20;
+		case '6' : return 300;
+		default : return 1;
+	}
+}
+
+
+List findAllSquares(List* lines, int w, int h, char *filename)
 {
     List squares = { NULL, NULL, 0 };
 
@@ -256,12 +304,14 @@ List findAllSquares(List* lines, int w, int h)
                                       .Y1 = point1.Y };
                     square.left = leftLine;
 
+					// get square dst here.
 
-                    if (!IsCorrectSquare(&square)) continue;
 
-                    void* p = square2voidptr(square);
-                    appendValue(&squares, p);
-
+                    if (IsCorrectSquare(&square, get_sqr_dst(filename)))
+					{
+						void* p = square2voidptr(square);
+						appendValue(&squares, p);
+					}
                 }
             }
         }
@@ -296,40 +346,6 @@ Square FindBestSquare(List* squarelist)
 }
 
 
-SDL_Surface* load_image(const char* path)
-{
-	SDL_Surface* temp = IMG_Load(path);
-	if (temp == NULL)
-		errx(EXIT_FAILURE, "%s", SDL_GetError());
-
-    SDL_Surface* ret = SDL_ConvertSurfaceFormat(temp, SDL_PIXELFORMAT_RGB888,
-            0);
-	if (ret == NULL)
-		errx(EXIT_FAILURE, "%s", SDL_GetError());
-
-	SDL_FreeSurface(temp);
-
-	return ret;
-}
-
-
-void save_texture(const char* file_name, SDL_Renderer* renderer,
-        SDL_Texture* texture)
-{
-    SDL_Texture* target = SDL_GetRenderTarget(renderer);
-    SDL_SetRenderTarget(renderer, texture);
-    int width, height;
-    SDL_QueryTexture(texture, NULL, NULL, &width, &height);
-    SDL_Surface* surface = SDL_CreateRGBSurface(0, width, height, 32,
-            0, 0, 0, 0);
-    SDL_RenderReadPixels(renderer, NULL, surface->format->format,
-            surface->pixels, surface->pitch);
-    IMG_SavePNG(surface, file_name);
-    SDL_FreeSurface(surface);
-    SDL_SetRenderTarget(renderer, target);
-}
-
-
 int main(int argc, char** argv)
 {
     if (argc != 2)
@@ -359,7 +375,18 @@ int main(int argc, char** argv)
     // load the image
     SDL_Texture* imageTexture = IMG_LoadTexture(renderer, argv[1]);
     if (imageTexture == NULL)
+	{
         errx(EXIT_FAILURE, "%s", SDL_GetError());
+	}
+
+	char* filename = argv[1];
+
+	if (filename[strlen(filename) - 1 - 5] == '1')
+	{
+		printf("No cropping neeeded !");
+		return EXIT_SUCCESS;
+	}
+
     // Create a surface to detect the grid
     SDL_Surface* image = load_image(argv[1]);
     if (image == NULL)
@@ -377,6 +404,11 @@ int main(int argc, char** argv)
             SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, image->w,
             image->h);
 
+    SDL_Surface *sobel =
+    SDL_CreateRGBSurface(0, image->w, image->h, 32, 0, 0, 0, 0);
+
+    // apply sobel filter on image
+    applySobel(image, sobel);
 
     // the drawing & saving part.
     // set the target texture
@@ -387,7 +419,7 @@ int main(int argc, char** argv)
     SDL_RenderCopy(renderer, imageTexture, NULL, NULL);
 
     // Apply grid detection algorithm
-    List lines = houghtransform(image, renderer);
+    List lines = houghtransform(sobel, renderer);
     printf("all detected lines :\n");
     printListOfLines(&lines);
 
@@ -439,7 +471,8 @@ int main(int argc, char** argv)
 
     save_texture("hough-reduced.png", renderer, targetLinesTexture);
 
-    List squarelist = findAllSquares(reducedlines, image->w, image->h);
+    List squarelist =
+		findAllSquares(reducedlines, image->w, image->h, filename);
 
     Square sudokuGrid = FindBestSquare(&squarelist);
 
@@ -483,6 +516,7 @@ int main(int argc, char** argv)
 
     // Quit SDL
     SDL_FreeSurface(image);
+    SDL_FreeSurface(sobel);
     // SDL_FreeSurface(grid);
     SDL_DestroyTexture(imageTexture);
     SDL_DestroyTexture(targetTexture);

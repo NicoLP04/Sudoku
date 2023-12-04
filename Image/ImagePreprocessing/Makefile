@@ -23,7 +23,7 @@ clean:
 	${RM} ${OBJ}
 	${RM} ${DEP}
 	${RM} ${TARGET}
-	rm -f image.jpeg
+	rm *.jpeg
 
 -include ${DEP}
 
