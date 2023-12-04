@@ -79,7 +79,21 @@ int main(int argc, char** argv)
     printf("****Applying Invert*****\n") ;
     surface_to_invert(s);
     printf("****Saving ....*****\n") ;
-    SDL_SaveBMP(s,argv[1]);
+	char num = 0;
+
+	int i;
+
+	for (i = strlen(argv[1]) - 1; i >= 0 && argv[1][i] != '.'; --i)
+	;
+
+	num = argv[1][i - 1];
+
+	char* filename = NULL;
+
+	asprintf(&filename, "image_%c.jpeg", num);
+
+    SDL_SaveBMP(s,filename);
+	free(filename);
 
     // - Free the surface.
     SDL_FreeSurface(s);
