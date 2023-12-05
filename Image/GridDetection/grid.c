@@ -69,6 +69,7 @@ void AverageLines(Line* a, Line* b)
     a->Y0 = (a->Y0 + b->Y0) / 2;
     a->X1 = (a->X1 + b->X1) / 2;
     a->Y1 = (a->Y1 + b->Y1) / 2;
+	a->theta = (a->theta + b->theta) / 2;
     b->X0 = -1;
 }
 
@@ -294,7 +295,8 @@ List findAllSquares(List* lines, int w, int h, char *filename)
                     Line botLine = { .X0 = point3.X,
                                      .Y0 = point3.Y,
                                      .X1 = point4.X,
-                                     .Y1 = point4.Y };
+                                     .Y1 = point4.Y,
+									 .theta = line4->theta };
                     square.bot = botLine;
 
 
@@ -488,10 +490,15 @@ int main(int argc, char** argv)
 
     save_texture("grid.png", renderer, gridTexture);
 
+	// angle calculation:
+	double angle = 0;
 
-	int angle = 0;
+	printf("theta=%f.\n", sudokuGrid.bot.theta);
+
+	angle = 180 * sudokuGrid.bot.theta / M_PI;
+
 	// printing angle for automatic rotation.
-	printf("angle=%i.\n",angle);
+	printf("angle=%f.\n",angle);
 
     /*
     SDL_Surface* grid = SDL_CreateRGBSurface(0,
