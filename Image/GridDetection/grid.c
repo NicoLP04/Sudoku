@@ -420,8 +420,6 @@ int main(int argc, char** argv)
 
     // Apply grid detection algorithm
     List lines = houghtransform(sobel, renderer);
-    printf("all detected lines :\n");
-    printListOfLines(&lines);
 
     // reset the target to the default renderer
     SDL_SetRenderTarget(renderer, NULL);
@@ -442,8 +440,6 @@ int main(int argc, char** argv)
     // reduced lines drawing part :
     // reduce the lines
     List* reducedlines = reduceLines(&lines);
-    printf("reduced lines :\n");
-    printListOfLines(reducedlines);
 
     // clear the screen
     SDL_RenderClear(renderer);
@@ -493,7 +489,9 @@ int main(int argc, char** argv)
     save_texture("grid.png", renderer, gridTexture);
 
 
-
+	int angle = 0;
+	// printing angle for automatic rotation.
+	printf("angle=%i.\n",angle);
 
     /*
     SDL_Surface* grid = SDL_CreateRGBSurface(0,
