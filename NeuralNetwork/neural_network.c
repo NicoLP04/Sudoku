@@ -37,6 +37,7 @@ int predict(SDL_Surface *image)
 
 	double inputs[numInputs] = { 0 };
 	Uint32 *pixels = image->pixels;
+  printf("%d, %d\n", image->h, image->w);
 	for (int b = 0; b < image->h; b++)
 	{
 		for (int a = 0; a < image->w; a++)
@@ -306,8 +307,8 @@ void init_weights()
 
 void print_results()
 {
-	char *setName = "TrainingSet/TestSet/";
-	size_t numImages = 10;
+	char *setName = "TrainingSet/TestSey/";
+	size_t numImages = 81;
 
 	// Get all the images from the training set of (TrainingSet/)
 	char **images = malloc(numImages * sizeof(char*));
