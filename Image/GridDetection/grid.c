@@ -581,10 +581,10 @@ int main(int argc, char** argv)
         Line_secondYmin = l4;
     }
 
-    printf("line Xmin       -> x=%i, y=%i", Line_Xmin.X0, Line_Xmin.Y0);
-    printf("line secondXmin -> x=%i, y=%i", Line_secondXmin.X0, Line_secondXmin.Y0);
-    printf("line Ymin       -> x=%i, y=%i", Line_Ymin.X0, Line_Ymin.Y0);
-    printf("line secondYmin -> x=%i, y=%i", Line_secondYmin.X0, Line_secondYmin.Y0);
+    printf("line Xmin       -> x=%i, y=%i\n", Line_Xmin.X0, Line_Xmin.Y0);
+    printf("line secondXmin -> x=%i, y=%i\n", Line_secondXmin.X0, Line_secondXmin.Y0);
+    printf("line Ymin       -> x=%i, y=%i\n", Line_Ymin.X0, Line_Ymin.Y0);
+    printf("line secondYmin -> x=%i, y=%i\n", Line_secondYmin.X0, Line_secondYmin.Y0);
 
 	// angle calculation:
 	double angle = 0;
