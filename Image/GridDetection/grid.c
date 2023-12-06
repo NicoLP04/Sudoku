@@ -659,15 +659,15 @@ int main(int argc, char** argv)
     }
 
     printf("\n");
-    printf("line Xmin       -> x=%i, y=%i\n", Line_Xmin.X0, Line_Xmin.Y0);
-    printf("line secondXmin -> x=%i, y=%i\n", Line_secondXmin.X0, Line_secondXmin.Y0);
-    printf("line Ymin       -> x=%i, y=%i\n", Line_Ymin.X0, Line_Ymin.Y0);
-    printf("line secondYmin -> x=%i, y=%i\n", Line_secondYmin.X0, Line_secondYmin.Y0);
+    printf("line Xmin       -> x=%5i, y=%5i\n", Line_Xmin.X0, Line_Xmin.Y0);
+    printf("line secondXmin -> x=%5i, y=%5i\n", Line_secondXmin.X0, Line_secondXmin.Y0);
+    printf("line Ymin       -> x=%5i, y=%5i\n", Line_Ymin.X0, Line_Ymin.Y0);
+    printf("line secondYmin -> x=%5i, y=%5i\n", Line_secondYmin.X0, Line_secondYmin.Y0);
     printf("\n");
-    printf("line Xmax       -> x=%i, y=%i\n", Line_Xmax.X0, Line_Xmax.Y0);
-    printf("line secondXmax -> x=%i, y=%i\n", Line_secondXmax.X0, Line_secondXmax.Y0);
-    printf("line Ymax       -> x=%i, y=%i\n", Line_Ymax.X0, Line_Ymax.Y0);
-    printf("line secondYmax -> x=%i, y=%i\n", Line_secondYmax.X0, Line_secondYmax.Y0);
+    printf("line Xmax       -> x=%5i, y=%5i\n", Line_Xmax.X0, Line_Xmax.Y0);
+    printf("line secondXmax -> x=%5i, y=%5i\n", Line_secondXmax.X0, Line_secondXmax.Y0);
+    printf("line Ymax       -> x=%5i, y=%5i\n", Line_Ymax.X0, Line_Ymax.Y0);
+    printf("line secondYmax -> x=%5i, y=%5i\n", Line_secondYmax.X0, Line_secondYmax.Y0);
     printf("\n");
 
     printf("SQUARE COORDINATES : (for cropping)\n");
