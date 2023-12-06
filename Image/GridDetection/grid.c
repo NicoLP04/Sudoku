@@ -490,6 +490,54 @@ int main(int argc, char** argv)
 
     save_texture("grid.png", renderer, gridTexture);
 
+
+
+    printf("Soduko grid coordinates :\n");
+
+    // checking coordinates value to correctly
+    // print x1,y1; x2,y2; x3,y3; x4,y4.
+    Line Line_Xmin = l1;
+
+    if (Line_Xmin.X0 > l2.X0)
+        Line_Xmin = l2;
+    if (Line_Xmin.X0 > l3.X0)
+        Line_Xmin = l3;
+    if (Line_Xmin.X0 > l4.X0)
+        Line_Xmin = l4;
+
+    Line Line_Ymin = l1;
+
+    if (Line_Ymin.Y0 > l2.Y0)
+        Line_Ymin = l2;
+    if (Line_Ymin.Y0 > l3.Y0)
+        Line_Ymin = l3;
+    if (Line_Ymin.Y0 > l4.Y0)
+        Line_Ymin = l4;
+
+    Line Line_Xmax = l1;
+
+    if (Line_Xmax.X0 < l2.X0)
+        Line_Xmax = l2;
+    if (Line_Xmax.X0 < l3.X0)
+        Line_Xmax = l3;
+    if (Line_Xmax.X0 < l4.X0)
+        Line_Xmax = l4;
+
+    Line Line_Ymax = l1;
+
+    if (Line_Ymax.Y0 < l2.Y0)
+        Line_Ymax = l2;
+    if (Line_Ymax.Y0 < l3.Y0)
+        Line_Ymax = l3;
+    if (Line_Ymax.Y0 < l4.Y0)
+        Line_Ymax = l4;
+
+    printf("x1=%i, y1=%i", Line_Ymin.X0, Line_Ymin.Y0);
+    printf("x2=%i, y2=%i", Line_Xmax.X0, Line_Xmax.Y0);
+    printf("x3=%i, y3=%i", Line_Ymax.X0, Line_Ymax.Y0);
+    printf("x4=%i, y4=%i", Line_Xmin.X0, Line_Xmin.Y0);
+
+
 	// angle calculation:
 	double angle = 0;
 
