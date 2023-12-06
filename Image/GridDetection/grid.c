@@ -586,15 +586,16 @@ int main(int argc, char** argv)
     printf("line Ymin       -> x=%i, y=%i\n", Line_Ymin.X0, Line_Ymin.Y0);
     printf("line secondYmin -> x=%i, y=%i\n", Line_secondYmin.X0, Line_secondYmin.Y0);
 
-	// angle calculation:
-	double angle = 0;
+    printf("SQUARE COORDINATES :\n (for cropping)");
 
-	printf("theta=%f.\n", sudokuGrid.bot.theta);
-
-	angle = 180 * sudokuGrid.bot.theta / M_PI;
-
-	// printing angle for automatic rotation.
-	printf("angle=%f.\n",angle);
+    if (Line_Xmin.Y0 > Line_secondXmin.Y0)
+    {
+        printf("x1=%i, y1=%i\n", Line_secondXmin.X0, Line_secondXmin.Y0);
+    }
+    else
+    {
+        printf("x1=%i, y1=%i\n", Line_Xmin.X0, Line_Xmin.Y0);
+    }
 
     /*
     SDL_Surface* grid = SDL_CreateRGBSurface(0,
