@@ -586,16 +586,19 @@ int main(int argc, char** argv)
     printf("line Ymin       -> x=%i, y=%i\n", Line_Ymin.X0, Line_Ymin.Y0);
     printf("line secondYmin -> x=%i, y=%i\n", Line_secondYmin.X0, Line_secondYmin.Y0);
 
-    printf("SQUARE COORDINATES :\n (for cropping)");
+    printf("SQUARE COORDINATES : (for cropping)\n");
 
     if (Line_Xmin.Y0 > Line_secondXmin.Y0)
-    {
         printf("x1=%i, y1=%i\n", Line_secondXmin.X0, Line_secondXmin.Y0);
-    }
     else
-    {
         printf("x1=%i, y1=%i\n", Line_Xmin.X0, Line_Xmin.Y0);
-    }
+
+    if (Line_Ymin.X0 > Line_secondYmin.X0)
+        printf("x2=%i, y2=%i\n", Line_Ymin.X0, Line_Ymin.Y0);
+    else
+        printf("x2=%i, y2=%i\n", Line_secondYmin.X0, Line_secondYmin.Y0);
+
+
 
     /*
     SDL_Surface* grid = SDL_CreateRGBSurface(0,
