@@ -496,8 +496,9 @@ int main(int argc, char** argv)
 
     // checking coordinates value to correctly
     // print x1,y1; x2,y2; x3,y3; x4,y4.
-    Line Line_Xmin = l1;
 
+    // XMIN
+    Line Line_Xmin = l1;
     if (Line_Xmin.X0 > l2.X0)
         Line_Xmin = l2;
     if (Line_Xmin.X0 > l3.X0)
@@ -505,6 +506,35 @@ int main(int argc, char** argv)
     if (Line_Xmin.X0 > l4.X0)
         Line_Xmin = l4;
 
+    Line Line_secondXmin;
+    int second_Xmin = INT32_MAX;
+    if (l1.X0 > Line_Xmin.X0)
+    {
+        second_Xmin = l1.X0;
+        Line_secondXmin = l1;
+    }
+    else if (l1.X0 < second_Xmin)
+    {
+        second_Xmin = l1.X0;
+        Line_secondXmin = l1;
+    }
+    if (l2.X0 > Line_Xmin.X0 && l2.X0 < second_Xmin)
+    {
+        second_Xmin = l2.X0;
+        Line_secondXmin = l2;
+    }
+    if (l3.X0 > Line_Xmin.X0 && l3.X0 < second_Xmin)
+    {
+        second_Xmin = l3.X0;
+        Line_secondXmin = l3;
+    }
+    if (l4.X0 > Line_Xmin.X0 && l4.X0 < second_Xmin)
+    {
+        second_Xmin = l4.X0;
+        Line_secondXmin = l4;
+    }
+
+    // YMIN
     Line Line_Ymin = l1;
 
     if (Line_Ymin.Y0 > l2.Y0)
@@ -514,29 +544,41 @@ int main(int argc, char** argv)
     if (Line_Ymin.Y0 > l4.Y0)
         Line_Ymin = l4;
 
-    Line Line_Xmax = l1;
+    Line Line_secondYmin;
+    int second_Ymin = INT32_MAX;
+    if (l1.Y0 > Line_Ymin.Y0)
+    {
+        second_Ymin = l1.Y0;
+        Line_secondYmin = l1;
+    }
+    else if (l1.Y0 < second_Ymin)
+    {
+        second_Ymin = l1.Y0;
+        Line_secondYmin = l1;
+    }
 
-    if (Line_Xmax.X0 < l2.X0)
-        Line_Xmax = l2;
-    if (Line_Xmax.X0 < l3.X0)
-        Line_Xmax = l3;
-    if (Line_Xmax.X0 < l4.X0)
-        Line_Xmax = l4;
+    if (l2.Y0 > Line_Ymin.Y0 && l2.Y0 < second_Ymin)
+    {
+        second_Ymin = l2.Y0;
+        Line_secondYmin = l2;
+    }
 
-    Line Line_Ymax = l1;
+    if (l3.Y0 > Line_Ymin.Y0 && l3.Y0 < second_Ymin)
+    {
+        second_Ymin = l3.Y0;
+        Line_secondYmin = l3;
+    }
 
-    if (Line_Ymax.Y0 < l2.Y0)
-        Line_Ymax = l2;
-    if (Line_Ymax.Y0 < l3.Y0)
-        Line_Ymax = l3;
-    if (Line_Ymax.Y0 < l4.Y0)
-        Line_Ymax = l4;
+    if (l4.Y0 > Line_Ymin.Y0 && l4.Y0 < second_Ymin)
+    {
+        second_Ymin = l4.Y0;
+        Line_secondYmin = l4;
+    }
 
-    printf("x1=%i, y1=%i", Line_Ymin.X0, Line_Ymin.Y0);
-    printf("x2=%i, y2=%i", Line_Xmax.X0, Line_Xmax.Y0);
-    printf("x3=%i, y3=%i", Line_Ymax.X0, Line_Ymax.Y0);
-    printf("x4=%i, y4=%i", Line_Xmin.X0, Line_Xmin.Y0);
-
+    printf("line Xmin       -> x=%i, y=%i", Line_Xmin.X0, Line_Xmin.Y0);
+    printf("line secondXmin -> x=%i, y=%i", Line_secondXmin.X0, Line_secondXmin.Y0);
+    printf("line Ymin       -> x=%i, y=%i", Line_Ymin.X0, Line_Ymin.Y0);
+    printf("line secondYmin -> x=%i, y=%i", Line_secondYmin.X0, Line_secondYmin.Y0);
 
 	// angle calculation:
 	double angle = 0;
