@@ -3,6 +3,7 @@
 #include <SDL2/SDL_image.h>
 #include <string.h>
 #include <stdlib.h>
+#include <math.h>
 
 
 SDL_Surface* extract(SDL_Surface *image)
@@ -11,74 +12,85 @@ SDL_Surface* extract(SDL_Surface *image)
 
 	size_t width = image->w;
 	size_t height = image->h;
+  int tw = width * 5 / 100;
+  int th = height * 5 / 100;
 
-	size_t xstart = 0;
-	size_t ystart = 0;
+	size_t xstart = width / 2;
+	size_t ystart = height / 2;
 	size_t xend = width - 1;
 	size_t yend = height - 1;
-	Uint8 l = 100;
+	Uint8 l = 200;
 
-	int stop = 0;
-	while (stop == 0)
+  int cont = 1;
+	while (cont == 1)
 	{
-		if (xstart >= width)
+		if (xend <= 0)
 			return image;
-		for (size_t y = 0; y < height; y++)
-		{
-			Uint8 r, g, b;
-			SDL_GetRGB(imagePixels[y * width + xstart], image->format,
-					&r, &g, &b);
-			if (r <= l && g <= l && b <= l)
-				stop = 1;
-		}
-		xstart++;
-	}
-	xstart-=2;
-
-	stop = 0;
-	while (stop == 0)
-	{
 		for (size_t y = 0; y < height; y++)
 		{
 			Uint8 r, g, b;
 			SDL_GetRGB(imagePixels[y * width + xend], image->format,
 					&r, &g, &b);
-			if (r <= l && g <= l && b <= l)
-				stop = 1;
+			if (r >= l && g >= l && b >= l)
+				cont = 0;
 		}
-		xend--;
+		  xend--;
 	}
-	xend+=3;
 
-	stop = 0;
-	while (stop == 0)
+  cont = 1;
+	while (cont == 1)
 	{
-		for (size_t x = 0; x < width; x++)
-		{
-			Uint8 r, g, b;
-			SDL_GetRGB(imagePixels[ystart * width + x], image->format,
-					&r, &g, &b);
-			if (r <= l && g <= l && b <= l)
-				stop = 1;
-		}
-		ystart++;
-	}
-	ystart-=2;
-
-	stop = 0;
-	while (stop == 0)
-	{
+		if (yend <= 0)
+			return image;
 		for (size_t x = 0; x < width; x++)
 		{
 			Uint8 r, g, b;
 			SDL_GetRGB(imagePixels[yend * width + x], image->format,
 					&r, &g, &b);
-			if (r <= l && g <= l && b <= l)
-				stop = 1;
+			if (r >= l && g >= l && b >= l)
+				cont = 0;
 		}
-		yend--;
+		  yend--;
 	}
-	yend+=3;
+
+  xstart = xend - 1;
+	cont = 1;
+	while (cont == 1)
+	{
+		if (xstart <= 0)
+			return image;
+    cont = 0;
+		for (size_t y = 0; y < height; y++)
+		{
+			Uint8 r, g, b;
+			SDL_GetRGB(imagePixels[y * width + xstart], image->format,
+					&r, &g, &b);
+			if (r >= l && g >= l && b >= l)
+				cont = 1;
+		}
+      xstart--;
+	}
+
+  ystart = yend - 1;
+  cont = 1;
+	while (cont == 1)
+	{
+    if (ystart == 0)
+      break;
+    cont = 0;
+		for (size_t x = 0; x < width; x++)
+		{
+			Uint8 r, g, b;
+			SDL_GetRGB(imagePixels[ystart * width + x], image->format,
+					&r, &g, &b);
+			if (r >= l && g >= l && b >= l)
+				cont = 1;
+		}
+		  ystart--;
+	}
+
+  if (xend - xstart <= 0 || yend - ystart <= 0)
+    return image;
 
 	SDL_Surface *cell = SDL_CreateRGBSurface(0, xend - xstart, yend - ystart,
       32,0,0,0,0);
@@ -102,26 +114,25 @@ SDL_Surface* extract(SDL_Surface *image)
 
 SDL_Surface* remove_border(SDL_Surface *image)
 {
-
 	Uint32* imagePixels = image->pixels;
 
 	size_t width = image->w;
 	size_t height = image->h;
 
-	double w10 = width / 10;
-	double h10 = height / 10;
+	double w10 = width * 21 / 100;
+	double h10 = height * 21 / 100;
 	size_t cellw = width - 2 * w10;
 	size_t cellh = height - 2 * h10;
 
 	SDL_Surface *cell = SDL_CreateRGBSurface(0, cellw, cellh, 32,0,0,0,0);
 	Uint32* cellPixels = cell->pixels;
 
-	for (size_t x = width / 10; x < width - w10; x++)
+	for (size_t x = 0; x < cellw; x++)
 	{
-		for (size_t y = height / 10; y < height - h10; y++)
+		for (size_t y = 0; y < cellh; y++)
         	{
-         		cellPixels[(y - (height / 10)) * cellw + x - width / 10] =
-              imagePixels[y * width + x];
+         		cellPixels[x * cellh + y] =
+              imagePixels[(size_t)((x + w10) * height + y + h10)];
 		}
 	}
 
@@ -141,64 +152,67 @@ void split(SDL_Surface *image)
 
     size_t xincrem = width / 9;
     size_t yincrem = height / 9;
+
     double xadd = 0;
     double yadd = 0;
 
     size_t numCell = 1;
     for (size_t y = 0; y < height; y += yincrem)
     {
+	      yadd += ((double)(height % 9) / 9);
+	      if (yadd >= 1)
+	      {
+		      y++;
+		      yadd--;
+	      }
         for (size_t x = 0; x < width; x += xincrem)
         {
+	          xadd += ((double)(width % 9) / 9);
+	          if (xadd >= 1)
+	          {
+              x++;
+		          xadd--;
+	          }
             if (y + yincrem <= height && x + xincrem <= width)
             {
-		SDL_Surface *cell = SDL_CreateRGBSurface(0, xincrem, yincrem,
-				32,0,0,0,0);
-		Uint32* cellPixels = cell->pixels;
+		            SDL_Surface *cell = SDL_CreateRGBSurface(0, xincrem, yincrem,
+				            32,0,0,0,0);
+	            	Uint32* cellPixels = cell->pixels;
 
-		// copy pixels
-		for (size_t a = x; a < x + xincrem; a++)
-    		{
-     			for (size_t b = y; b < y + yincrem; b++)
-        		{
-         			cellPixels[(b - y) * xincrem + a-x] =
-						imagePixels[b * width + a];
-        		}
-    		}
+	            	// copy pixels
+		            for (size_t a = x; a < x + xincrem; a++)
+    		        {
+     			        for (size_t b = y; b < y + yincrem; b++)
+        		      {
+         		      	cellPixels[(b - y) * xincrem + a-x] =
+					        	imagePixels[b * width + a];
+        		      }
+    		        }
 
-		cell = remove_border(cell);
-		cell = extract(cell);
+            		SDL_Surface *cell2 = remove_border(cell);
+            		SDL_Surface *cell3 = extract(cell2);
 
-		// save cell
-		char *cellName = malloc(20 * sizeof(char));
-		cellName[0] = 0;
-		strcat(cellName, "Cells/");
+		             //save cell
+		          char *cellName = malloc(20 * sizeof(char));
+		          cellName[0] = 0;
+		          strcat(cellName, "Cells/");
 
-		char num[256];
-		snprintf(num, sizeof(num), "%zu", numCell);
-		strcat(cellName, num);
+		          char num[256];
+		          snprintf(num, sizeof(num), "%zu", numCell);
+		          strcat(cellName, num);
 
-		strcat(cellName, ".png");
+		          strcat(cellName, ".png");
 
-		IMG_SavePNG(cell, cellName);
+	          	IMG_SavePNG(cell3, cellName);
 
-		free(cellName);
-		SDL_FreeSurface(cell);
-		numCell++;
+		          free(cellName);
+		          SDL_FreeSurface(cell);
+		          SDL_FreeSurface(cell2);
+		          SDL_FreeSurface(cell3);
+		          numCell++;
             }
 
-	    xadd += ((double)(width % 9) / 9);
-	    if (xadd >= 1)
-	    {
-		    x++;
-		    xadd--;
-	    }
         }
-	yadd += ((double)(height % 9) / 9);
-	if (yadd >= 1)
-	{
-		y++;
-		yadd--;
-	}
     }
 }
 
