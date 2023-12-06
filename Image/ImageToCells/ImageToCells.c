@@ -5,15 +5,12 @@
 #include <stdlib.h>
 #include <math.h>
 
-
 SDL_Surface* extract(SDL_Surface *image)
 {
 	Uint32* imagePixels = image->pixels;
 
 	size_t width = image->w;
 	size_t height = image->h;
-  int tw = width * 5 / 100;
-  int th = height * 5 / 100;
 
 	size_t xstart = width / 2;
 	size_t ystart = height / 2;
@@ -36,6 +33,7 @@ SDL_Surface* extract(SDL_Surface *image)
 		}
 		  xend--;
 	}
+  xend+=2;
 
   cont = 1;
 	while (cont == 1)
@@ -52,6 +50,7 @@ SDL_Surface* extract(SDL_Surface *image)
 		}
 		  yend--;
 	}
+  yend+=2;
 
   xstart = xend - 1;
 	cont = 1;
@@ -94,6 +93,13 @@ SDL_Surface* extract(SDL_Surface *image)
 
 	SDL_Surface *cell = SDL_CreateRGBSurface(0, xend - xstart, yend - ystart,
       32,0,0,0,0);
+
+  if (xend-xstart <= 10 || xend-xstart <= 10)
+  {
+    SDL_FreeSurface(image);
+    return cell;
+  }
+
 	Uint32* cellPixels = cell->pixels;
 
 	for (size_t x = xstart; x < xend; x++)
@@ -105,8 +111,7 @@ SDL_Surface* extract(SDL_Surface *image)
 		}
 	}
 
-
-	SDL_FreeSurface(image);
+  SDL_FreeSurface(image);
 
 	return cell;
 }
@@ -191,6 +196,7 @@ void split(SDL_Surface *image)
 
             		SDL_Surface *cell2 = remove_border(cell);
             		SDL_Surface *cell3 = extract(cell2);
+                SDL_Surface *cell4 = resizeImage(cell3, 28, 28);
 
 		             //save cell
 		          char *cellName = malloc(20 * sizeof(char));
@@ -203,12 +209,10 @@ void split(SDL_Surface *image)
 
 		          strcat(cellName, ".png");
 
-	          	IMG_SavePNG(cell3, cellName);
+	          	IMG_SavePNG(cell4, cellName);
 
 		          free(cellName);
-		          SDL_FreeSurface(cell);
-		          SDL_FreeSurface(cell2);
-		          SDL_FreeSurface(cell3);
+		          SDL_FreeSurface(cell4);
 		          numCell++;
             }
 
