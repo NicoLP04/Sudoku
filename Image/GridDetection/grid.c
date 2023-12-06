@@ -590,34 +590,32 @@ int main(int argc, char** argv)
     if (Line_Xmax.X0 < l4.X0)
         Line_Xmax = l4;
     Line Line_secondXmax = { .X0 = 0, .Y0 = 0, .X1 = 0, .Y1 = 0 };
-    int second_Xmax = INT32_MIN;
 
-    if (l1.X0 < Line_Xmax.X0)
+    if (l1.X0 != Line_Xmax.X0 && l1.Y0 != Line_Xmax.Y0 &&
+        l1.X0 != Line_Xmin.X0 && l1.Y0 != Line_Xmin.Y0 &&
+        l1.X0 != Line_secondXmin.X0 && l1.Y0 != Line_secondXmin.Y0)
     {
-        second_Xmax = l1.X0;
-        Line_secondXmax = l1;
-    }
-    else if (l1.X0 <= Line_Xmax.X0 && l1.X0 >= second_Xmax)
-    {
-        second_Xmax = l1.X0;
         Line_secondXmax = l1;
     }
 
-    if (l2.X0 < Line_Xmax.X0 && l2.X0 >= second_Xmax)
+    if (l2.X0 != Line_Xmax.X0 && l2.Y0 != Line_Xmax.Y0 &&
+        l2.X0 != Line_Xmin.X0 && l2.Y0 != Line_Xmin.Y0 &&
+        l2.X0 != Line_secondXmin.X0 && l2.Y0 != Line_secondXmin.Y0)
     {
-        second_Xmax = l2.X0;
         Line_secondXmax = l2;
     }
 
-    if (l3.X0 < Line_Xmax.X0 && l3.X0 >= second_Xmax)
+    if (l3.X0 != Line_Xmax.X0 && l3.Y0 != Line_Xmax.Y0 &&
+        l3.X0 != Line_Xmin.X0 && l3.Y0 != Line_Xmin.Y0 &&
+        l3.X0 != Line_secondXmin.X0 && l3.Y0 != Line_secondXmin.Y0)
     {
-        second_Xmax = l3.X0;
         Line_secondXmax = l3;
     }
 
-    if (l4.X0 < Line_Xmax.X0 && l4.X0 >= second_Xmax)
+    if (l4.X0 != Line_Xmax.X0 && l4.Y0 != Line_Xmax.Y0 &&
+        l4.X0 != Line_Xmin.X0 && l4.Y0 != Line_Xmin.Y0 &&
+        l4.X0 != Line_secondXmin.X0 && l4.Y0 != Line_secondXmin.Y0)
     {
-        second_Xmax = l4.X0;
         Line_secondXmax = l4;
     }
 
@@ -630,36 +628,33 @@ int main(int argc, char** argv)
         Line_Ymax = l3;
     if (Line_Ymax.Y0 < l4.Y0)
         Line_Ymax = l4;
-
     Line Line_secondYmax = { .X0 = 0, .Y0 = 0, .X1 = 0, .Y1 = 0 };
-    int second_Ymax = INT32_MIN;
 
-    if (l1.Y0 < Line_Ymax.Y0)
+    if (l1.X0 != Line_Ymax.X0 && l1.Y0 != Line_Ymax.Y0 &&
+        l1.X0 != Line_Ymin.X0 && l1.Y0 != Line_Ymin.Y0 &&
+        l1.X0 != Line_secondYmin.X0 && l1.Y0 != Line_secondYmin.Y0)
     {
-        second_Ymax = l1.Y0;
-        Line_secondYmax = l1;
-    }
-    else if (l1.Y0 >= Line_Ymax.Y0 && l1.Y0 >= second_Ymax)
-    {
-        second_Ymax = l1.Y0;
         Line_secondYmax = l1;
     }
 
-    if (l2.Y0 < Line_Ymax.Y0 && l2.Y0 >= second_Ymax)
+    if (l2.X0 != Line_Ymax.X0 && l2.Y0 != Line_Ymax.Y0 &&
+        l2.X0 != Line_Ymin.X0 && l2.Y0 != Line_Ymin.Y0 &&
+        l2.X0 != Line_secondYmin.X0 && l2.Y0 != Line_secondYmin.Y0)
     {
-        second_Ymax = l2.Y0;
         Line_secondYmax = l2;
     }
 
-    if (l3.Y0 < Line_Ymax.Y0 && l3.Y0 >= second_Ymax)
+    if (l3.X0 != Line_Ymax.X0 && l3.Y0 != Line_Ymax.Y0 &&
+        l3.X0 != Line_Ymin.X0 && l3.Y0 != Line_Ymin.Y0 &&
+        l3.X0 != Line_secondYmin.X0 && l3.Y0 != Line_secondYmin.Y0)
     {
-        second_Ymax = l3.Y0;
         Line_secondYmax = l3;
     }
 
-    if (l4.Y0 < Line_Ymax.Y0 && l4.Y0 >= second_Ymax)
+    if (l4.X0 != Line_Ymax.X0 && l4.Y0 != Line_Ymax.Y0 &&
+        l4.X0 != Line_Ymin.X0 && l4.Y0 != Line_Ymin.Y0 &&
+        l4.X0 != Line_secondYmin.X0 && l4.Y0 != Line_secondYmin.Y0)
     {
-        second_Ymax = l4.Y0;
         Line_secondYmax = l4;
     }
 
