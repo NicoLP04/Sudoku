@@ -506,7 +506,10 @@ int main(int argc, char** argv)
     if (Line_Xmin.X0 > l4.X0)
         Line_Xmin = l4;
 
-    Line Line_secondXmin;
+    Line Line_secondXmin = { .X0 = 0,
+                             .Y0 = 0,
+                             .X1 = 0,
+                             .Y1 = 0 };
     int second_Xmin = INT32_MAX;
     if (l1.X0 > Line_Xmin.X0)
     {
@@ -544,7 +547,10 @@ int main(int argc, char** argv)
     if (Line_Ymin.Y0 > l4.Y0)
         Line_Ymin = l4;
 
-    Line Line_secondYmin;
+    Line Line_secondYmin = { .X0 = 0,
+                             .Y0 = 0,
+                             .X1 = 0,
+                             .Y1 = 0 };
     int second_Ymin = INT32_MAX;
     if (l1.Y0 > Line_Ymin.Y0)
     {
