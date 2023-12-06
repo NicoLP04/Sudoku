@@ -581,10 +581,105 @@ int main(int argc, char** argv)
         Line_secondYmin = l4;
     }
 
+    // XMAX
+    Line Line_Xmax = l1;
+    if (Line_Xmax.X0 < l2.X0)
+        Line_Xmax = l2;
+    if (Line_Xmax.X0 < l3.X0)
+        Line_Xmax = l3;
+    if (Line_Xmax.X0 < l4.X0)
+        Line_Xmax = l4;
+    Line Line_secondXmax = { .X0 = 0,
+                             .Y0 = 0,
+                             .X1 = 0,
+                             .Y1 = 0 };
+    int second_Xmax = INT32_MIN;
+
+    if (l1.X0 < Line_Xmax.X0)
+    {
+        second_Xmax = l1.X0;
+        Line_secondXmax = l1;
+    }
+    else if (l1.X0 > second_Xmax)
+    {
+        second_Xmax = l1.X0;
+        Line_secondXmax = l1;
+    }
+
+    if (l2.X0 < Line_Xmax.X0 && l2.X0 > second_Xmax)
+    {
+        second_Xmax = l2.X0;
+        Line_secondXmax = l2;
+    }
+
+    if (l3.X0 < Line_Xmax.X0 && l3.X0 > second_Xmax)
+    {
+        second_Xmax = l3.X0;
+        Line_secondXmax = l3;
+    }
+
+    if (l4.X0 < Line_Xmax.X0 && l4.X0 > second_Xmax)
+    {
+        second_Xmax = l4.X0;
+        Line_secondXmax = l4;
+    }
+
+    // YMAX
+    Line Line_Ymax = l1;
+
+    if (Line_Ymax.Y0 < l2.Y0)
+        Line_Ymax = l2;
+    if (Line_Ymax.Y0 < l3.Y0)
+        Line_Ymax = l3;
+    if (Line_Ymax.Y0 < l4.Y0)
+        Line_Ymax = l4;
+
+    Line Line_secondYmax = { .X0 = 0,
+                             .Y0 = 0,
+                             .X1 = 0,
+                             .Y1 = 0 };
+    int second_Ymax = INT32_MIN;
+
+    if (l1.Y0 < Line_Ymax.Y0)
+    {
+        second_Ymax = l1.Y0;
+        Line_secondYmax = l1;
+    }
+    else if (l1.Y0 > second_Ymax)
+    {
+        second_Ymax = l1.Y0;
+        Line_secondYmax = l1;
+    }
+
+    if (l2.Y0 < Line_Ymax.Y0 && l2.Y0 > second_Ymax)
+    {
+        second_Ymax = l2.Y0;
+        Line_secondYmax = l2;
+    }
+
+    if (l3.Y0 < Line_Ymax.Y0 && l3.Y0 > second_Ymax)
+    {
+        second_Ymax = l3.Y0;
+        Line_secondYmax = l3;
+    }
+
+    if (l4.Y0 < Line_Ymax.Y0 && l4.Y0 > second_Ymax)
+    {
+        second_Ymax = l4.Y0;
+        Line_secondYmax = l4;
+    }
+
+    printf("\n");
     printf("line Xmin       -> x=%i, y=%i\n", Line_Xmin.X0, Line_Xmin.Y0);
     printf("line secondXmin -> x=%i, y=%i\n", Line_secondXmin.X0, Line_secondXmin.Y0);
     printf("line Ymin       -> x=%i, y=%i\n", Line_Ymin.X0, Line_Ymin.Y0);
     printf("line secondYmin -> x=%i, y=%i\n", Line_secondYmin.X0, Line_secondYmin.Y0);
+    printf("\n");
+    printf("line Xmax       -> x=%i, y=%i\n", Line_Xmax.X0, Line_Xmax.Y0);
+    printf("line secondXmax -> x=%i, y=%i\n", Line_secondXmax.X0, Line_secondXmax.Y0);
+    printf("line Ymax       -> x=%i, y=%i\n", Line_Ymax.X0, Line_Ymax.Y0);
+    printf("line secondYmax -> x=%i, y=%i\n", Line_secondYmax.X0, Line_secondYmax.Y0);
+    printf("\n");
 
     printf("SQUARE COORDINATES : (for cropping)\n");
 
