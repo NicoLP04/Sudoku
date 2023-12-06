@@ -559,7 +559,7 @@ int main(int argc, char** argv)
                              .X1 = 0,
                              .Y1 = 0 };
     int second_Ymin = INT32_MAX;
-    if (l1.Y0 >= Line_Ymin.Y0)
+    if (l1.Y0 > Line_Ymin.Y0)
     {
         second_Ymin = l1.Y0;
         Line_secondYmin = l1;
@@ -570,19 +570,19 @@ int main(int argc, char** argv)
         Line_secondYmin = l1;
     }
 
-    if (l2.Y0 >= Line_Ymin.Y0 && l2.Y0 < second_Ymin)
+    if (l2.Y0 > Line_Ymin.Y0 && l2.Y0 < second_Ymin)
     {
         second_Ymin = l2.Y0;
         Line_secondYmin = l2;
     }
 
-    if (l3.Y0 >= Line_Ymin.Y0 && l3.Y0 < second_Ymin)
+    if (l3.Y0 > Line_Ymin.Y0 && l3.Y0 < second_Ymin)
     {
         second_Ymin = l3.Y0;
         Line_secondYmin = l3;
     }
 
-    if (l4.Y0 >= Line_Ymin.Y0 && l4.Y0 < second_Ymin)
+    if (l4.Y0 > Line_Ymin.Y0 && l4.Y0 < second_Ymin)
     {
         second_Ymin = l4.Y0;
         Line_secondYmin = l4;
