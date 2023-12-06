@@ -564,7 +564,7 @@ int main(int argc, char** argv)
         second_Ymin = l1.Y0;
         Line_secondYmin = l1;
     }
-    else if (l1.Y0 < second_Ymin)
+    else if (l1.Y0 < second_Ymin && l1.Y0 != Line_Ymin.Y0)
     {
         second_Ymin = l1.Y0;
         Line_secondYmin = l1;
