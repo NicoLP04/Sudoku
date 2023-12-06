@@ -385,7 +385,7 @@ int main(int argc, char** argv)
 
 	if (filename[strlen(filename) - 1 - 5] == '1')
 	{
-		printf("No cropping neeeded !");
+		printf("No cropping neeeded !\n");
 		return EXIT_SUCCESS;
 	}
 
