@@ -559,7 +559,7 @@ int main(int argc, char** argv)
                              .X1 = 0,
                              .Y1 = 0 };
     int second_Ymin = INT32_MAX;
-    if (l1.Y0 > Line_Ymin.Y0)
+    if (l1.Y0 > Line_Ymin.Y0 && l1.Y0 != Line_Ymin.Y0)
     {
         second_Ymin = l1.Y0;
         Line_secondYmin = l1;
