@@ -490,7 +490,14 @@ int main(int argc, char** argv)
 
     save_texture("grid.png", renderer, gridTexture);
 
+    printf("debug i guess ?\n");
 
+    printf("l1 ->   x=%5i, y=%5i\n", l1.X0, l1.Y0);
+    printf("l2 ->   x=%5i, y=%5i\n", l2.X0, l2.Y0);
+    printf("l3 ->   x=%5i, y=%5i\n", l3.X0, l3.Y0);
+    printf("l4 ->   x=%5i, y=%5i\n", l4.X0, l4.Y0);
+
+    printf("\n");
 
     printf("Soduko grid coordinates :\n");
 
