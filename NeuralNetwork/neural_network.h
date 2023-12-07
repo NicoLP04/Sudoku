@@ -13,9 +13,11 @@
 #define numHiddens 120
 #define numOutputs 10
 
+// yes
+SDL_Surface* load_image(const char* path);
 
 // predict output based on inputs
-int predict(SDL_Surface *image);
+int predict(SDL_Surface *image, char *file);
 
 // train neural network
 void train(long epochs, double lr, char *file, size_t numImages);

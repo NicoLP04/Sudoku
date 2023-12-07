@@ -8,7 +8,7 @@ LDFLAGS = -fsanitize=address `pkg-config --cflags sdl2 SDL2_image` -lSDL2 -lSDL2
 LDLIBS = -lm `pkg-config --cflags sdl2 SDL2_image`
 
 
-SRC := ImageToCells.c
+SRC := imageToCells.c ../../NeuralNetwork/neural_network.c ../../NeuralNetwork/maths_func.c
 OBJ = ${SRC:.c=.o}
 DEP = ${SRC:.c=.d}
 
@@ -23,6 +23,8 @@ clean:
 	${RM} ${OBJ}
 	${RM} ${DEP}
 	${RM} ${TARGET}
+	rm -f grid
+	rm -rf Cells/
 
 -include ${DEP}
 

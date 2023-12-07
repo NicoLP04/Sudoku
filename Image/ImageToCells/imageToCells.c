@@ -4,6 +4,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
+#include "../../NeuralNetwork/neural_network.h"
 
 
 SDL_Surface* resizeImage(SDL_Surface* originalSurface,
@@ -174,8 +175,9 @@ SDL_Surface* remove_border(SDL_Surface *image)
 
 
 
-void split(SDL_Surface *image)
+void split(SDL_Surface *image, char *name)
 {
+    FILE *f = fopen(name, "w");
     Uint32* imagePixels = image->pixels;
 
     size_t width = image->w;
@@ -225,28 +227,43 @@ void split(SDL_Surface *image)
                 SDL_Surface *cell4 = resizeImage(cell3, 28, 28);
 
 		             //save cell
-		          char *cellName = malloc(20 * sizeof(char));
-		          cellName[0] = 0;
-		          strcat(cellName, "Cells/");
+                /*
+		            char *cellName = malloc(20 * sizeof(char));
+		            cellName[0] = 0;
+		            strcat(cellName, "Cells/");
 
-		          char num[256];
-		          snprintf(num, sizeof(num), "%zu", numCell);
-		          strcat(cellName, num);
+		            char num[256];
+		            snprintf(num, sizeof(num), "%zu", numCell);
+		            strcat(cellName, num);
 
-		          strcat(cellName, ".png");
+		            strcat(cellName, ".png");
 
-	          	IMG_SavePNG(cell4, cellName);
+	          	  IMG_SavePNG(cell4, cellName);
 
-		          free(cellName);
-		          SDL_FreeSurface(cell4);
-		          numCell++;
+//		            free(cellName);
+                */
+                int val = predict(cell4, "../../NeuralNetwork/values");
+                if (val != 0)
+                  fprintf(f, "%d", val);
+                else
+                  fprintf(f, ".");
+                if (numCell % 9 == 0)
+                  fprintf(f, "\n");
+                else if (numCell % 3 == 0)
+                  fprintf(f, " ");
+                if (numCell % 27 == 0)
+                  fprintf(f, "\n");
+		            SDL_FreeSurface(cell4);
+		            numCell++;
             }
 
         }
     }
+
+    fclose(f);
 }
 
-
+/*
 SDL_Surface* load_image(const char* path)
 {
     SDL_Surface* temp=IMG_Load(path);
@@ -259,7 +276,7 @@ SDL_Surface* load_image(const char* path)
     SDL_FreeSurface(temp);
     return newsurf;
 }
-
+*/
 int main(int argc, char** argv)
 {
 	if (argc != 2)
@@ -267,7 +284,7 @@ int main(int argc, char** argv)
 
 	SDL_Surface *image = load_image(argv[1]);
 
-	split(image);
+	split(image, "grid");
 
 	SDL_FreeSurface(image);
 

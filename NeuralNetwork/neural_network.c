@@ -31,9 +31,9 @@ SDL_Surface* load_image(const char* path)
 }
 
 // predict output
-int predict(SDL_Surface *image)
+int predict(SDL_Surface *image, char *file)
 {
-	load("values");
+	load(file);
 
 	double inputs[numInputs] = { 0 };
 	Uint32 *pixels = image->pixels;
@@ -72,9 +72,7 @@ int predict(SDL_Surface *image)
   {
     if (outputLayer[i] > outputLayer[res])
       res = i;
-    printf("%f, ", outputLayer[i]);
   }
-  printf(" -> %f\n", outputLayer[res]);
 	return res;
 }
 
@@ -335,7 +333,7 @@ void print_results()
 	{
 		char *name = images[i];
 		SDL_Surface *image = load_image(name);
-		int res = predict(image);
+		int res = predict(image, "values");
 		int exp = *(name+20) - '0';
 
 		printf("For image %s, ", name);
