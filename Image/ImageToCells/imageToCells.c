@@ -5,6 +5,32 @@
 #include <stdlib.h>
 #include <math.h>
 
+
+SDL_Surface* resizeImage(SDL_Surface* originalSurface,
+int newWidth, int newHeight)
+{
+    if (originalSurface == NULL)
+        return NULL;
+    SDL_Surface* resizedSurface = SDL_CreateRGBSurfaceWithFormat(0, newWidth,
+    newHeight, originalSurface->format->BitsPerPixel,
+    originalSurface->format->format);
+
+    if (resizedSurface == NULL)
+    {
+        printf("Unable to create resized surface! SDL Error: %s\n",
+        SDL_GetError());
+        return NULL;
+    }
+    if (SDL_BlitScaled(originalSurface, NULL, resizedSurface, NULL) != 0)
+    {
+        printf("Unable to scale image! SDL Error: %s\n", SDL_GetError());
+        return NULL;
+    }
+    SDL_FreeSurface(originalSurface);
+    return resizedSurface;
+}
+
+
 SDL_Surface* extract(SDL_Surface *image)
 {
 	Uint32* imagePixels = image->pixels;
