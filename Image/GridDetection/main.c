@@ -69,17 +69,17 @@ int main(int argc, char** argv)
 	SDL_Surface* image = load_image(argv[1]);
     if (image == NULL)
         errx(EXIT_FAILURE, "%s", SDL_GetError());
-	
+
 	// texture to draw detected lines.
     SDL_Texture* targetTexture = SDL_CreateTexture(renderer,
             SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, image->w,
             image->h);
-	
+
 	// texture to draw reduced lines.
 	SDL_Texture* targetLinesTexture = SDL_CreateTexture(renderer,
 		SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, image->w,
 		image->h);
-	
+
 	// texture to draw sudoku grid.
     SDL_Texture* gridTexture = SDL_CreateTexture(renderer,
             SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET, image->w,
@@ -89,7 +89,7 @@ int main(int argc, char** argv)
 	// applying sobel filter on the input image.
 	SDL_Surface *sobel =
     	SDL_CreateRGBSurface(0, image->w, image->h, 32, 0, 0, 0, 0);
-	
+
 	applySobel(image, sobel);
 
 
@@ -226,7 +226,7 @@ int main(int argc, char** argv)
 
     if (Line_Ymin.Y0 > l2.Y0)
         Line_Ymin = l2;
-    if (Line_Ymin.Y0 > l3.Y0)   
+    if (Line_Ymin.Y0 > l3.Y0)
         Line_Ymin = l3;
     if (Line_Ymin.Y0 > l4.Y0)
         Line_Ymin = l4;
@@ -402,25 +402,25 @@ int main(int argc, char** argv)
     IMG_SavePNG(grid, "grid.png");
 
     // Quit SDL
-    
+
     // SDL_FreeSurface(image); no need to call this line already freed in the
     // call of crop function.
     SDL_FreeSurface(sobel);
     SDL_FreeSurface(grid);
-    
+
     SDL_DestroyTexture(imageTexture);
     SDL_DestroyTexture(targetTexture);
     SDL_DestroyTexture(targetLinesTexture);
     SDL_DestroyTexture(gridTexture);
-    
+
     SDL_DestroyRenderer(renderer);
-    
+
     SDL_DestroyWindow(window);
-    
+
     SDL_Quit();
 
     freeList(&lines);
-    freeList(&squarelist);  
+    freeList(&squarelist);
 
 	return EXIT_SUCCESS;
 }
