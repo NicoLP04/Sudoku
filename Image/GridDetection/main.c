@@ -342,31 +342,85 @@ int main(int argc, char** argv)
         Line_secondYmax = l4;
     }
 
+    int x1, y1, x2, y2, x3, y3, x4, y4;
+
     if (Line_Xmin.Y0 > Line_secondXmin.Y0)
+    {
         printf("x1=%5i, y1=%5i\n", Line_secondXmin.X0, Line_secondXmin.Y0);
+        x1 = Line_secondXmin.X0;
+        y1 = Line_secondXmin.Y0;
+    }
     else
+    {
         printf("x1=%5i, y1=%5i\n", Line_Xmin.X0, Line_Xmin.Y0);
-
+        x1 = Line_Xmin.X0;
+        y1 = Line_Xmin.Y0;
+    }
     if (Line_Ymin.X0 > Line_secondYmin.X0)
+    {
         printf("x2=%5i, y2=%5i\n", Line_Ymin.X0, Line_Ymin.Y0);
+        x2 = Line_Ymin.X0;
+        y2 = Line_Ymin.Y0;
+    }
     else
+    {
         printf("x2=%5i, y2=%5i\n", Line_secondYmin.X0, Line_secondYmin.Y0);
-
+        x2 = Line_secondYmin.X0;
+        y2 = Line_secondYmin.Y0;
+    }
     if (Line_Xmax.Y0 > Line_secondXmax.Y0)
+    {
         printf("x3=%5i, y3=%5i\n", Line_Xmax.X0, Line_Xmax.Y0);
+        x3 = Line_Xmax.X0;
+        y3 = Line_Xmax.Y0;
+    }
     else
+    {
         printf("x3=%5i, y3=%5i\n", Line_secondXmax.X0, Line_secondXmax.Y0);
-    
+        x3 = Line_secondXmax.X0;
+        y3 = Line_secondXmax.Y0;
+    }
     if (Line_Ymax.X0 > Line_secondYmax.X0)
+    {
         printf("x4=%5i, y4=%5i\n", Line_secondYmax.X0, Line_secondYmax.Y0);
+        x4 = Line_secondYmax.X0;
+        y4 = Line_secondYmax.Y0;
+    }
     else
 	{
         printf("x4=%5i, y4=%5i\n", Line_Ymax.X0, Line_Ymax.Y0);
+        x4 = Line_Ymax.X0;
+        y4 = Line_Ymax.Y0;
 	}
 
 
 	// -----------------------------------------------------------------------
 	// call to crop function and saving.
+
+    SDL_Surface *grid = crop(image, x1, y1, x2, y2, x3, y3, x4, y4);
+
+    IMG_SavePNG(grid, "grid.png");
+
+    // Quit SDL
+    
+    // SDL_FreeSurface(image); no need to call this line already freed in the
+    // call of crop function.
+    SDL_FreeSurface(sobel);
+    SDL_FreeSurface(grid);
+    
+    SDL_DestroyTexture(imageTexture);
+    SDL_DestroyTexture(targetTexture);
+    SDL_DestroyTexture(targetLinesTexture);
+    SDL_DestroyTexture(gridTexture);
+    
+    SDL_DestroyRenderer(renderer);
+    
+    SDL_DestroyWindow(window);
+    
+    SDL_Quit();
+
+    freeList(&lines);
+    freeList(&squarelist);  
 
 	return EXIT_SUCCESS;
 }
