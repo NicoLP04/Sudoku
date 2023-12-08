@@ -243,7 +243,7 @@ void save(char *file)
 void load(char *file)
 {
 	FILE *f;
-
+	//printf("File inside neural network load : %s\n", file);
 	double a;
         f = fopen(file, "r");
 

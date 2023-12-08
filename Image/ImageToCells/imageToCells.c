@@ -242,7 +242,7 @@ void split(SDL_Surface *image, char *name)
 
 //		            free(cellName);
                 */
-                int val = predict(cell4, "../../NeuralNetwork/values");
+                int val = predict(cell4, "NeuralNetwork/values"/*"../../NeuralNetwork/values"*/);
                 if (val != 0)
                   fprintf(f, "%d", val);
                 else

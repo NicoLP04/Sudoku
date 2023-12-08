@@ -66,7 +66,7 @@ static void drawNumber(SDL_Renderer *renderer, int row, int col, int num,SDL_Col
     char text[2];
     sprintf(text, "%d", num);
 
-    TTF_Font *font = TTF_OpenFont("arial.ttf", 28); 
+    TTF_Font *font = TTF_OpenFont("arial.ttf"/*"Image/SolvedImage/arial.ttf"*/, 28); 
     if (!font) 
     {
         printf("Error getting the font : %s\n", TTF_GetError());

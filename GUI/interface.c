@@ -15,7 +15,7 @@ typedef enum State
     FILTER,                           
     DETECT_LINES,                           
     ROTATE,
-    CROP,
+    NEURAL,
     SOLVE,
     END,
 } State;
@@ -74,17 +74,23 @@ char CurrentSudoku[9][9];
 int IMAGE_WIDTH = 600;
 int IMAGE_HEIGHT = 600;
 
-char ROTATE_RES_FULL[MAX_FILE_PATH] = "FullDemoImages/rotated.png";
-char ROTATE_RES_PARTIAL[MAX_FILE_PATH] = "PartialDemoImages/rotated.png";
+char ROTATE_RES_FULL[MAX_FILE_PATH] = "GUI/FullDemoImages/rotated.png";
+char ROTATE_RES_PARTIAL[MAX_FILE_PATH] = "GUI/PartialDemoImages/rotated.png";
 char GRID_FILE[MAX_FILE_PATH] = "grid_00";
 
+//image_01.jpeg
+//image_1.jpeg
 
-char FILTER_RES_FULL[MAX_FILE_PATH] = "FullDemoImages/image.jpeg";
-char FILTER_RES_PARTIAL[MAX_FILE_PATH] = "PartialDemoImages/image.jpeg";
+//feur.jpeg => image_r.jpeg
 
+char FILTER_RES_FULL[MAX_FILE_PATH] = "GUI/FullDemoImages/";
+char FILTER_RES_PARTIAL[MAX_FILE_PATH] = "GUI/PartialDemoImages/";
 
-gchar ACTUAL_FILE[MAX_FILE_PATH] = "Images/image_01.jpeg";
-gchar ACTUAL_FILE_SECONDARY[MAX_FILE_PATH] = "Images/image_01.jpeg";
+char DETECT_RES_FULL[MAX_FILE_PATH] = "GUI/FullDemoImages/grid.png";
+char DETECT_RES_PARTIAL[MAX_FILE_PATH] = "GUI/PartialDemoImages/grid.png";
+
+gchar ACTUAL_FILE[MAX_FILE_PATH] = "Image/ImageExamples/image_01.jpeg";
+gchar ACTUAL_FILE_SECONDARY[MAX_FILE_PATH] = "Image/ImageExamples/Images/image_01.jpeg";
 char* ROTATION_ANGLE = "69";
 
 
@@ -147,6 +153,7 @@ void set_text_and_center(GtkTextView *text_view, gchar *text, gint width)
 // Function to create a GdkPixbuf from a file
 GdkPixbuf *create_and_set_pixbuf(const gchar *filename, gpointer user_data)
 {
+    printf("inside creating pixbuf : %s\n", filename);
     UserInterface * ui = user_data;
     int demo = ui->demo_state == PartialDemo;
     GdkPixbuf *pixbuf;
@@ -184,22 +191,12 @@ void file_chooser_response(GtkWidget *dialog, gint response_id, gpointer user_da
     {
         // Get the selected file from the file chooser
         gchar *filename = gtk_file_chooser_get_filename(GTK_FILE_CHOOSER(dialog));
-        /*CORRECT :
-        char *current_dir = g_get_current_dir();
-        GFile* file = g_file_new_for_path(filename);
-        GFile *base_file = g_file_new_for_path(current_dir);
-        // Get the relative path
-         
-        char *relative_path = g_file_get_relative_path(base_file, file);
-        snprintf(ACTUAL_FILE, MAX_FILE_PATH, "%s", relative_path);*/
-
         snprintf(demo ? ACTUAL_FILE_SECONDARY : ACTUAL_FILE, MAX_FILE_PATH, "%s", filename);
         printf("MODIFIED ACTUAL FILE %s\n", demo ? ACTUAL_FILE_SECONDARY : ACTUAL_FILE);
         // Load the image using GdkPixbuf
         create_and_set_pixbuf(filename, user_data);
         set_text_and_center((demo ? ui->text_view_image_secondary : ui->text_view_image), demo ? ACTUAL_FILE_SECONDARY : ACTUAL_FILE, -1);
     }
-
     // Close the file chooser dialog
     gtk_widget_destroy(dialog);
 }
@@ -240,16 +237,10 @@ gboolean on_configure(GtkWidget *widget, GdkEvent *event, gpointer user_data)
     UserInterface* ui = user_data;
     gint y_max = gtk_widget_get_allocated_height(GTK_WIDGET(ui->window));
     gint x_max = gtk_widget_get_allocated_width(GTK_WIDGET(ui->window));
-
     g_print("Xmax : %i\n", x_max);
     g_print("Ymax : %i\n", y_max);
-
-
     //gtk_widget_set_size_request(ui->nex_button, 200, 200);
     //gtk_widget_set_size_request(GTK_WIDGET(ui->displayed_image), 800 , 600);
-
-
-
     return FALSE;
 
     //UserInterface* ui = user_data;
@@ -267,12 +258,12 @@ void handle_rotate(GtkWidget* widget, gpointer data)
         double val = ui->secondary_rotation_angle;
         sprintf(angle, "%lf", val);
     }
-    size_t buffer_size = strlen("./rotate  ") + strlen(demo ? ACTUAL_FILE_SECONDARY : ACTUAL_FILE) + strlen((demo ? angle : ROTATION_ANGLE)) + 1;
+    size_t buffer_size = strlen("./Image/Rotation/rotate ") + strlen(demo ? ACTUAL_FILE_SECONDARY : ACTUAL_FILE) + strlen((demo ? angle : ROTATION_ANGLE)) + 1;
     char* buffer = (char *)malloc(buffer_size);
-    snprintf(buffer, buffer_size * sizeof(char), "./rotate %s %s", demo ? ACTUAL_FILE_SECONDARY : ACTUAL_FILE, (demo ? angle : ROTATION_ANGLE));
+    snprintf(buffer, buffer_size * sizeof(char), "./Image/Rotation/rotate  %s %s", demo ? ACTUAL_FILE_SECONDARY : ACTUAL_FILE, (demo ? angle : ROTATION_ANGLE));
     int status = system(buffer);
     g_free(buffer);
-    rename("rotated.png", demo ? "PartialDemoImages/rotated.png"  : "FullDemoImages/rotated.png");
+    rename("rotated.png", demo ? "GUI/PartialDemoImages/rotated.png"  : "GUI/FullDemoImages/rotated.png");
     if (WEXITSTATUS(status))
     {
         g_print("External program executed successfully!\n");
@@ -285,28 +276,95 @@ void handle_rotate(GtkWidget* widget, gpointer data)
         g_print("External program execution failed with status: %d\n", status);
 }
 
-void handle_crop(GtkWidget* widget, gpointer data)
+void handle_image_to_cell(GtkWidget* widget, gpointer data)
 {
+    UserInterface* ui = data;
+    int demo = ui->demo_state == PartialDemo;
 
+    size_t buffer_size = strlen("./Image/ImageToCells/ImageToCells ") + 
+    strlen(demo ? ACTUAL_FILE_SECONDARY : ACTUAL_FILE) + 1;
+    char* buffer = (char *)malloc(buffer_size);
+    snprintf(buffer, buffer_size * sizeof(char), "./Image/ImageToCells/ImageToCells %s",
+    demo ? ACTUAL_FILE_SECONDARY : ACTUAL_FILE);
+    printf("Beginning image to cell : %s\n", buffer);
+    int status = system(buffer);
+    if (WEXITSTATUS(status) != 0)
+    {
+        return;
+    }
+
+    size_t buffer_size2 = strlen("./Image/SolvedImage/Result ") + 
+    strlen("grid") + 1;
+    char* buffer2 = (char *)malloc(buffer_size2);
+    snprintf(buffer2, buffer_size2 * sizeof(char), "./Image/SolvedImage/Result %s",
+    "grid");
+
+    status = system(buffer2);
+
+    g_free(buffer);
+    rename("gridbefore.png", demo ? "GUI/PartialDemoImages/gridbefore.png"  : "GUI/FullDemoImages/gridbefore.png");
+    if (WEXITSTATUS(status))
+    {
+        set_text_and_center(ui->text_view, "Succesfully detected full image.", 100);
+        g_print("External program executed successfully!\n");
+        strcpy(demo ? ACTUAL_FILE_SECONDARY : ACTUAL_FILE, demo ? "GUI/PartialDemoImages/gridbefore.png" :
+        "GUI/FullDemoImages/gridbefore.png");
+        g_print("%s", ACTUAL_FILE);
+        GdkPixbuf *pixbuf = create_and_set_pixbuf(demo ? "GUI/PartialDemoImages/gridbefore.png"
+        : "GUI/FullDemoImages/gridbefore.png", ui);
+        if (pixbuf == NULL)
+            g_print("Error creating GdkPixbuf from image.jpeg\n");
+    }
+    else 
+        g_print("External program execution failed with status: %d\n", status);
 }
 
 void handle_filter(GtkWidget* widget, gpointer data)
 {
     UserInterface* ui = data;
     int demo = ui->demo_state == PartialDemo;
-    size_t buffer_size = strlen("./PreProcessing ") + strlen(demo ? ACTUAL_FILE_SECONDARY : ACTUAL_FILE) + 1;
+
+    char num = 0;
+    int i;
+    for (i = strlen(demo ? ACTUAL_FILE_SECONDARY : ACTUAL_FILE) - 1; i >= 0 &&
+    (demo ? ACTUAL_FILE_SECONDARY : ACTUAL_FILE)[i] != '.'; --i)
+    ;
+
+    num = (demo ? ACTUAL_FILE_SECONDARY : ACTUAL_FILE)[i - 1];
+
+    char* filename = NULL;
+
+    asprintf(&filename, "image_%c.jpeg", num);
+   
+    size_t buffer_size = strlen("./Image/ImagePreprocessing/PreProcessing ") + strlen(demo ? ACTUAL_FILE_SECONDARY : ACTUAL_FILE) + 1;
     char* buffer = (char *)malloc(buffer_size);
-    snprintf(buffer, buffer_size * sizeof(char), "./PreProcessing %s", demo ? ACTUAL_FILE_SECONDARY : ACTUAL_FILE);
+    snprintf(buffer, buffer_size * sizeof(char), "./Image/ImagePreprocessing/PreProcessing %s", demo ? ACTUAL_FILE_SECONDARY : ACTUAL_FILE);
     int status = system(buffer);
     g_free(buffer);
-    rename("image.jpeg", demo ? "PartialDemoImages/image.jpeg"  : "FullDemoImages/image.jpeg");
+
+    char* buffer2 = NULL;
+    if (demo)
+    {
+        asprintf(&buffer2, "GUI/PartialDemoImages/%s", filename);
+    }
+    else
+    {
+        asprintf(&buffer2, "GUI/FullDemoImages/%s", filename);
+    }
+    printf("result : %s\n", buffer2);
+
+    rename((filename), buffer2);
     if (WEXITSTATUS(status) == 0)
     {
+
+        char* buffer3 = NULL;
+        asprintf(&buffer3, "%s%s", demo ? FILTER_RES_PARTIAL : FILTER_RES_FULL, buffer2 );
+
         set_text_and_center(ui->text_view, "Succesfully filtered image. \n\nApplied : \n\n - Grayscale\n\n - Contrast\n\n - Median\n\n - Threshold\n\n - Invert", 100);
         g_print("External program executed successfully!\n");
-        strcpy(demo ? ACTUAL_FILE_SECONDARY : ACTUAL_FILE, demo ? FILTER_RES_PARTIAL : FILTER_RES_FULL);
+        strcpy(demo ? ACTUAL_FILE_SECONDARY : ACTUAL_FILE, buffer2);
         g_print("%s", ACTUAL_FILE);
-        GdkPixbuf *pixbuf = create_and_set_pixbuf(demo ? FILTER_RES_PARTIAL : FILTER_RES_FULL, ui);
+        GdkPixbuf *pixbuf = create_and_set_pixbuf(buffer2, ui);
         if (pixbuf == NULL)
             g_print("Error creating GdkPixbuf from image.jpeg\n");
     }
@@ -316,7 +374,29 @@ void handle_filter(GtkWidget* widget, gpointer data)
 
 void handle_grid_detection(GtkWidget* widget, gpointer data)
 {
-    
+    UserInterface* ui = data;
+    int demo = ui->demo_state == PartialDemo;
+    size_t buffer_size = strlen("./Image/GridDetection/GridDetection ") + 
+    strlen(demo ? ACTUAL_FILE_SECONDARY : ACTUAL_FILE) + 1;
+    char* buffer = (char *)malloc(buffer_size);
+    snprintf(buffer, buffer_size * sizeof(char), "./Image/GridDetection/GridDetection %s",
+    demo ? ACTUAL_FILE_SECONDARY : ACTUAL_FILE);
+    printf("Beginning detection on : %s\n", buffer);
+    int status = system(buffer);
+    g_free(buffer);
+    rename("grid.png", demo ? "GUI/PartialDemoImages/grid.png"  : "GUI/FullDemoImages/grid.png");
+    if (WEXITSTATUS(status) == 0)
+    {
+        set_text_and_center(ui->text_view, "Succesfully filtered image. \n\nApplied : \n\n - Grayscale\n\n - Contrast\n\n - Median\n\n - Threshold\n\n - Invert", 100);
+        g_print("External program executed successfully!\n");
+        strcpy(demo ? ACTUAL_FILE_SECONDARY : ACTUAL_FILE, demo ? DETECT_RES_PARTIAL : DETECT_RES_FULL);
+        g_print("%s", ACTUAL_FILE);
+        GdkPixbuf *pixbuf = create_and_set_pixbuf(demo ? DETECT_RES_PARTIAL : DETECT_RES_FULL, ui);
+        if (pixbuf == NULL)
+            g_print("Error creating GdkPixbuf from image.jpeg\n");
+    }
+    else 
+        g_print("External program execution failed with status: %d\n", status);
 }
 
 
@@ -336,17 +416,17 @@ void next_step_button(GtkWidget *widget, gpointer data)
     UserInterface* ui = data;
     switch (ui->state)
     {
-        case CROP:
+        case NEURAL:
             ui->state = SOLVE;
-            handle_crop(widget, data); break;
+            handle_image_to_cell(widget, data); break;
         case FILTER:
             ui->state = DETECT_LINES;
             handle_filter(widget, data); break;
         case DETECT_LINES:
-            ui->state = CROP;
+            ui->state = NEURAL;
             handle_grid_detection(widget, data); break;
         case ROTATE:
-            ui->state = CROP;
+            ui->state = NEURAL;
             handle_rotate(widget, data); break;
         case SOLVE:
             ui->state = END;
@@ -384,35 +464,29 @@ void all_step(GtkWidget *widget, gpointer data)
 
 void crop_button_handler(GtkWidget* widget, gpointer data)
 {
-    handle_crop(widget, data);
+    handle_image_to_cell(widget, data);
 }
 
 
 void rotate_button_handler(GtkWidget* widget, gpointer data)
 {
-    //UserInterface* ui = data;
     handle_rotate(widget, data);
 }
 
 void filter_button_handler(GtkWidget* widget, gpointer data)
 {
-    // UserInterface* ui = data;
      handle_filter(widget, data);
 }
 
 void detect_button_handler(GtkWidget* widget, gpointer data)
 {
-     //UserInterface* ui = data;
      handle_grid_detection(widget, data);
 }
 
 void solve_button_handler(GtkWidget* widget, gpointer data)
 {
     handle_solve(widget, data);
-    // UserInterface* ui = data;
 }
-
-
 
 
 void setup_solver(gpointer data)
@@ -422,42 +496,9 @@ void setup_solver(gpointer data)
     FILE *fp = fopen(filename, "r");
     if (fp == NULL)
     {
-        printf("Error: could not open file %s", filename);
+        printf("Error: could not open file %s\n", filename);
         return;
     }  
-   
-
-    /*while ((ch = fgetc(fp)) != EOF)
-    {*/
-        //printf("i : %zu, j : %zu\n", i,j);
-        /*printf("actual char : %c (%zu, %zu)\n", ch, i,j ssss);
-        if (ch ==' ')
-        {
-            continue;
-        }
-        if (ch == '\n')
-        {
-            if ((j + 1) % 3 == 0)
-            {
-                i = 0;
-            }
-            else
-            {
-                i = 0;
-                j += 1;
-            }
-        }
-        else 
-        {
-            char* add = malloc(sizeof(char));
-            sprintf(add, "%c",ch);
-            GtkWidget *child = gtk_grid_get_child_at(ui->grid_for_modifier, i, j);
-            gtk_entry_set_text(GTK_ENTRY(child) , add);
-            i += 1;
-
-            free(add);
-        }
-    }*/
 
     for (int i = 0; i < 9; i++) 
         {   
@@ -628,7 +669,7 @@ int main(int argc, char *argv[]) {
 
     if (argc < 2)
     {
-        printf("missing image");
+        printf("missing image\n");
         filename = ACTUAL_FILE;
     }
     else
@@ -644,7 +685,7 @@ int main(int argc, char *argv[]) {
     GtkBuilder *builder;
 
     builder = gtk_builder_new();
-    gtk_builder_add_from_file(builder, "interface.glade", NULL);
+    gtk_builder_add_from_file(builder, "GUI/interface.glade", NULL);
 
 
     filter_button = GTK_BUTTON(gtk_builder_get_object(builder, "filter_button"));
@@ -738,7 +779,7 @@ int main(int argc, char *argv[]) {
 
 
 
-    g_signal_connect(open_button_secondary, "clicked", G_CALLBACK(handle_crop), &ui);
+    g_signal_connect(open_button_secondary, "clicked", G_CALLBACK(handle_image_to_cell), &ui);
 
 
     gtk_widget_set_name((all_button), "button");
@@ -812,9 +853,6 @@ int main(int argc, char *argv[]) {
     GtkStyleContext *context = gtk_widget_get_style_context(nex_button);
     gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_USER);*/
 
-
-
-
     //gtk_widget_set_child_visible(grid, ui.demo_state == FullDemo);
     //gtk_widget_set_child_visible(grid_partial, ui.demo_state == PartialDemo);
     gtk_widget_show_all(GTK_WIDGET(window));
@@ -824,107 +862,3 @@ int main(int argc, char *argv[]) {
 
     return 0;
 }
-
-
-
-
-
-
-
-/*
-
-
-
-
-
-
-
-
-
-
-
-int main(int argc, char *argv[]) {
-    GtkWindow *window;
-    GtkWidget *image;
-    GtkButton *nex_button;
-    GtkButton *file_explorer_button;
-    GtkButton *all_button;
-    GtkWidget *text_view;
-    GtkTextBuffer *text_buffer;
-    GtkWidget *grid_partial;
-    GtkWidget *grid;
-    gchar *filename;
-
-    if (argc < 2)
-    {
-        printf("missing image");
-        filename = ACTUAL_FILE;
-    }
-    else
-    {
-        filename = argv[1];
-        strcpy(ACTUAL_FILE, filename);
-        printf("Beginning : %s\n", ACTUAL_FILE);
-    }
-
-    gtk_init(NULL, NULL);
-
-    GtkBuilder *builder = gtk_builder_new_from_file("test.glade");
-
-    //WITH GLADE
-    window = GTK_WINDOW(gtk_builder_get_object(builder, "main_window"));
-    //fixed = GTK_WIDGET(gtk_builder_get_object(builder, "fixed"));
-    grid = GTK_WIDGET(gtk_builder_get_object(builder, "grid_full"));
-    grid_partial = GTK_WIDGET(gtk_builder_get_object(builder, "grid_partial"));
-
-    nex_button = GTK_BUTTON(gtk_builder_get_object(builder, "next_step"));
-    all_button = GTK_BUTTON(gtk_builder_get_object(builder, "all_step"));
-    file_explorer_button = GTK_BUTTON(gtk_builder_get_object(builder, "open_explorer"));
-    image = GTK_WIDGET(gtk_builder_get_object(builder, "image_displayed")); //GTK_IMAGE(gtk_builder_get_object(builder, "image_displayed"));
-    text_view = GTK_WIDGET(gtk_builder_get_object(builder, "text_view"));
-    text_buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(text_view));
-
-    gtk_window_set_title(GTK_WINDOW(window), "OCR Sudoku Solver");
-
-    set_text_and_center(GTK_TEXT_VIEW(text_view), "Welcome to the OCR sudoku solver.\n \n- Select your sudoku image from your files\n \n- Use the next step button to proceed to\nthe next step of the\nresolution of your sudoku\n \n- Enjoy !\n \nIn case no images are selected, you can use the provided example", 100);
-   // gtk_text_buffer_set_text(text_buffer, "Welcome to the OCR sudoku solver.\n \n- Select your sudoku image from your files\n \n- Use the next step button to proceed to\nthe next step of the\nresolution of your sudoku\n \n- Enjoy !\n \nIn case no images are selected, you can use the provided example", -1);
-    
-    //gtk_widget_set_size_request(text_view, 100, 100);  // Set your desired width and height
-
-    gtk_widget_set_size_request(GTK_WIDGET(window), 800, 800);
-
-    UserInterface ui = {
-                .demo_state = FullDemo,
-                .text_view = GTK_TEXT_VIEW(text_view),
-                .buffer = text_buffer,
-                .state = FILTER,
-                .grid = grid,
-                .window = window,
-                .displayed_image = image,
-                .all_button = (all_button),
-                .nex_button = (nex_button),
-                .training_cb = NULL,
-            };
-
-    GdkPixbuf *pixbuf = create_and_set_pixbuf(filename, &ui);
-    gtk_image_set_from_pixbuf(GTK_IMAGE(image), pixbuf);
-    g_object_unref(pixbuf);
-
-    const GdkPixbuf *pb = gtk_image_get_pixbuf(GTK_IMAGE(image));
-
-    IMAGE_WIDTH = gdk_pixbuf_get_width(pb);
-    IMAGE_HEIGHT = gdk_pixbuf_get_height(pb);
-
-    g_signal_connect(file_explorer_button, "clicked", G_CALLBACK(choose_image), &ui);
-    g_signal_connect(nex_button, "clicked", G_CALLBACK(next_step_button), &ui);
-    g_signal_connect(window, "configure-event", G_CALLBACK(on_configure), &ui);
-    // Show all widgets
-
-    gtk_widget_set_child_visible(grid, ui.demo_state == FullDemo);
-    gtk_widget_set_child_visible(grid_partial, ui.demo_state == PartialDemo);
-    gtk_widget_show_all(GTK_WIDGET(window));
-    // Start the GTK main loop
-    gtk_main();
-
-    return 0;
-}*/
