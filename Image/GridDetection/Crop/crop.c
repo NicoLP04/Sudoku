@@ -4,32 +4,11 @@ typedef struct {
     double matrix[3][3];
 } HomographyMatrix;
 
-// Helper function to get pixel color at (x, y) from a surface
-Uint32 get_pixel(SDL_Surface* surface, int x, int y) {
-    int bpp = surface->format->BytesPerPixel;
-    Uint8* p = (Uint8*)surface->pixels + y * surface->pitch + x * bpp;
-
-    switch (bpp) {
-        case 1:
-            return *p;
-        case 2:
-            return *(Uint16*)p;
-        case 3:
-            if (SDL_BYTEORDER == SDL_BIG_ENDIAN)
-                return p[0] << 16 | p[1] << 8 | p[2];
-            else
-                return p[0] | p[1] << 8 | p[2] << 16;
-        case 4:
-            return *(Uint32*)p;
-        default:
-            return 0; // Shouldn't happen, but just in case
-    }
-}
-
 // Helper function to set pixel color at (x, y) in a surface
 void set_pixel(SDL_Surface* surface, int x, int y, Uint32 pixel) {
     int bpp = surface->format->BytesPerPixel;
     Uint8* p = (Uint8*)surface->pixels + y * surface->pitch + x * bpp;
+//    printf("%d, %d\n", x, y);
 
     switch (bpp) {
         case 1:
@@ -76,6 +55,7 @@ SDL_Surface* transposeImage(SDL_Surface* inputImage, double matrix[3][3], double
     for (int yo = 0; yo < outputImage->h; ++yo) {
         for (int xo = 0; xo < outputImage->w; ++xo) {
             double idk = xo * matrix[2][0] + yo * matrix[2][1] + matrix[2][2];
+            //printf("%f\n", idk);
             int x = (xo * matrix[0][0] + yo * matrix[0][1] + matrix[0][2]) / idk;
             int y = (xo * matrix[1][0] + yo * matrix[1][1] + matrix[1][2]) / idk;
 
@@ -91,12 +71,20 @@ SDL_Surface* transposeImage(SDL_Surface* inputImage, double matrix[3][3], double
 }
 
 
+void printMatrix(double A[9][9], int rows, int cols) {
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            printf("%f\t", A[i][j]);
+        }
+        printf("\n");
+    }
+}
+
 double determinant(double A[3][3]) {
     return A[0][0] * (A[1][1] * A[2][2] - A[2][1] * A[1][2]) -
            A[0][1] * (A[1][0] * A[2][2] - A[2][0] * A[1][2]) +
            A[0][2] * (A[1][0] * A[2][1] - A[2][0] * A[1][1]);
 }
-
 
 void invertMatrix_3x3(double A[3][3], double result[3][3]) {
     double det = determinant(A);
@@ -143,7 +131,6 @@ void Minor(double minorMatrix[9][9], int colMatrix, int sizeMatrix,
     return;
 }
 
-
 double Determinte(double minorMatrix[9][9], int sizeMatrix)
 {
     int col;
@@ -161,10 +148,10 @@ double Determinte(double minorMatrix[9][9], int sizeMatrix)
     {
         for (col = 0; col < sizeMatrix; col++)
         {
-            Minor(minorMatrix, col, sizeMatrix, newMinorMatrix);
+            Minor(minorMatrix, col, sizeMatrix, newMinorMatrix); // function
             sum += (double)(minorMatrix[0][col] * pow(-1, col)
                             * Determinte(newMinorMatrix,
-                                         (sizeMatrix - 1)));
+                                         (sizeMatrix - 1))); // function
         }
     }
     return sum;
@@ -181,7 +168,7 @@ void Transpose(double cofactorMatrix[9][9], double sizeMatrix,
         {
             transposeMatrix[row][col] = cofactorMatrix[col][row];
             coutMatrix[row][col] =
-                cofactorMatrix[col][row] / determinte;
+                cofactorMatrix[col][row] / determinte; // adjoint method
         }
     }
     return;
@@ -222,7 +209,7 @@ void Cofactor(double cinMatrix[9][9], double sizeMatrix, double determinte,
         }
     }
     Transpose(cofactorMatrix, sizeMatrix, determinte, coutMatrix,
-              transposeMatrix);
+              transposeMatrix); // function
     return;
 }
 
@@ -240,7 +227,7 @@ void Inverse(double cinMatrix[9][9], int sizeMatrix, double determinte,
     else
     {
         Cofactor(cinMatrix, sizeMatrix, determinte, coutMatrix,
-                 transposeMatrix);
+                 transposeMatrix); // function
     }
     return;
 }
@@ -290,7 +277,9 @@ HomographyMatrix computeHomography(double src[][2], double dst[][2]) {
     for (int i = 0; i < 9; i++) {
         for (int j = 0; j < 9; j++) {
             V[i] += invA[i][j] * B[j];
+            printf("%f, ", V[i]);
         }
+        printf("\n");
     }
     int k = 0;
     for (int i = 0; i < 3; i++) {
@@ -299,19 +288,10 @@ HomographyMatrix computeHomography(double src[][2], double dst[][2]) {
         }
     }
 
+    //H.matrix[2][2] = 1;
+
     return H;
 }
-
-
-SDL_Surface* load_image(const char* path)
-{
-    SDL_Surface* temp=IMG_Load(path);
-    SDL_Surface* newsurf =
-      SDL_ConvertSurfaceFormat(temp,SDL_PIXELFORMAT_RGB888,0);
-    SDL_FreeSurface(temp);
-    return newsurf;
-}
-
 
 SDL_Surface *crop(SDL_Surface *image, double x1, double y1, double x2, double y2,
     double x3, double y3, double x4, double y4)
@@ -331,6 +311,15 @@ SDL_Surface *crop(SDL_Surface *image, double x1, double y1, double x2, double y2
 
     invertMatrix_3x3(res.matrix, H);
 
+    // Print the homography matrix
+    printf("Homography Matrix:\n");
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            printf("%f\t", H[i][j]);
+        }
+        printf("\n");
+    }
+
 	  SDL_Surface *newImage = transposeImage(image, H, length);
 	  SDL_FreeSurface(image);
 
@@ -343,11 +332,13 @@ int main(int argc, char** argv) {
     printf("%d, %d\n", image->w, image->h);
 
     //SDL_Surface* newImage = crop(image, 335, 214, 1149, 207, 1159, 1028, 337, 1030); // 2
-    SDL_Surface* newImage = crop(image, 128, 88, 649, 87, 650, 607, 130, 608); // 3
+    //SDL_Surface* newImage = crop(image, 128, 88, 649, 87, 650, 607, 130, 608); // 3
     //SDL_Surface* newImage = crop(image, 408, 164, 1524, 189, 1541, 1306, 419, 1310); // 4
     //SDL_Surface* newImage = crop(image, 625, 179, 1367, 694, 849, 1434, 110, 915); // 5
-    //SDL_Surface* newImage = crop(image, 64, 52, 1959, 54, 2102, 1848, 24, 1932); // 6
+    SDL_Surface* newImage = crop(image, 64, 52, 1959, 54, 2102, 1848, 24, 1932); // 6
     IMG_SavePNG(newImage, "RESULT.png");
 	  SDL_FreeSurface(newImage);
     return 0;
-}*/
+}
+*/
+

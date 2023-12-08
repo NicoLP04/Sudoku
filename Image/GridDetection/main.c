@@ -394,6 +394,11 @@ int main(int argc, char** argv)
         y4 = Line_Ymax.Y0;
 	}
 
+	printf("\ndebug prints : (in main function)\n");
+	printf("x1=%5i, y1=%5i\n", x1, y1);
+	printf("x2=%5i, y2=%5i\n", x2, y2);
+	printf("x3=%5i, y3=%5i\n", x3, y3);
+	printf("x4=%5i, y4=%5i\n", x4, y4);
 
 	// -----------------------------------------------------------------------
 	// call to crop function and saving.

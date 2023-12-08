@@ -6,7 +6,7 @@ CPPFLAGS = -MMD
 CFLAGS = -Wall -Wextra -O3 -g `pkg-config --cflags sdl2 SDL2_image` -D\_\_NO\_INLINE\_\_
 LDFLAGS = `pkg-config --cflags sdl2 SDL2_image` -lSDL2 -lSDL2_image
 LDLIBS = -lm `pkg-config --cflags sdl2 SDL2_image`
-
+LIBS = `pkg-config --libs sdl2 SDL2_image`
 
 SRC := $(shell find -name '*.c')
 OBJ = ${SRC:.c=.o}
@@ -15,7 +15,7 @@ DEP = ${SRC:.c=.d}
 all: $(TARGET)
 
 $(TARGET): ${OBJ}
-	$(CC) $(LDFLAGS) $(OBJ) $(LDLIBS) -o $(TARGET)
+	$(CC) $(LDFLAGS) $(OBJ) -o $(TARGET) $(LDLIBS) $(LIBS)
 
 .PHONY: clean
 

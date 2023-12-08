@@ -5,7 +5,8 @@
 #include <math.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
-
+#include "../image.h"
+#include "../pixel.h"
 
 /*  This should be the only function to use from crop.c
  *  It takes an image and the four points of the grid and gives a new image
