@@ -42,36 +42,40 @@ int main(int argc, char** argv)
         errx(EXIT_FAILURE, "%s", SDL_GetError());
     }
     //  - Transform the surface into grayscale
-    printf("****Applying Grayscale*****\n") ;
+    //printf("****Applying Grayscale*****\n") ;
 	surface_to_grayscale(s);
 
     Uint8 seuil = getaverage(s);
 
     int histo[256] = {0};
     int* histogram = gethistogram(s,histo);
-    printf("****Applying Contrast*****\n") ;
+    //printf("****Applying Contrast*****\n") ;
     surface_to_contrast(s,histogram);
-    printf("****Applying Median*****\n") ;
+    //printf("****Applying Median*****\n") ;
     surface_to_median(s);
-    printf("****Applying Threshold*****\n") ;
+    //printf("****Applying Threshold*****\n") ;
+    printf("%d\n",seuil);
     if (seuil<150)
     {
-        surface_to_seuillage(s,seuil+20);
+        surface_to_threshold(s,seuil+20);
     }
 
     else if (seuil <175)
     {
-        surface_to_seuillage(s,seuil-(255-seuil));
+        surface_to_threshold(s,seuil-(255-seuil));
     }
     else if (seuil <190)
     {
-        surface_to_seuillage(s,seuil-50);
+        surface_to_threshold(s,seuil-50);
     }
     else if (seuil<210)
     {
-        surface_to_seuillage(s,seuil-15);
+        surface_to_threshold(s,seuil);
     }
-    else {surface_to_seuillage(s,123);}
+    else
+    {
+        surface_to_threshold(s,123);
+    }
 
     //surface_to_invert(s);
     // - Save the image
@@ -79,9 +83,9 @@ int main(int argc, char** argv)
     surface_to_median(s);
     //surface_to_smooth(s); Issue on smooth
     //surface_to_median(s);
-    printf("****Applying Invert*****\n") ;
+    //printf("****Applying Invert*****\n") ;
     surface_to_invert(s);
-    printf("****Saving ....*****\n") ;
+   // printf("****Saving ....*****\n") ;
 	char num = 0;
 
 	int i;

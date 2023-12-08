@@ -41,25 +41,24 @@ static void drawGrid(SDL_Renderer *renderer)
     }
 }
 
-static void savePNG(SDL_Renderer *renderer) 
+static void savePNG(SDL_Renderer *renderer,char* name) 
 {
     SDL_Surface *surface = SDL_CreateRGBSurface(0, SCREEN_WIDTH, SCREEN_HEIGHT, 32,
                                                 0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
-    if (surface == NULL) {
+    if (surface == NULL) 
+    {
         printf("Failed to create surface! SDL_Error: %s\n", SDL_GetError());
         return;
     }
 
     SDL_RenderReadPixels(renderer, NULL, SDL_PIXELFORMAT_ARGB8888, surface->pixels, surface->pitch);
-    SDL_SaveBMP(surface, "sudoku_grid.png");
+    SDL_SaveBMP(surface, name);
 
     SDL_FreeSurface(surface);
 }
 
 static void drawNumber(SDL_Renderer *renderer, int row, int col, int num,SDL_Color color) 
 {
-    // Couleur du texte
-
     SDL_Surface *surface;
     SDL_Texture *texture;
     SDL_Rect rect;
@@ -70,7 +69,7 @@ static void drawNumber(SDL_Renderer *renderer, int row, int col, int num,SDL_Col
     TTF_Font *font = TTF_OpenFont("arial.ttf", 28); 
     if (!font) 
     {
-        printf("Erreur lors du chargement de la police : %s\n", TTF_GetError());
+        printf("Error getting the font : %s\n", TTF_GetError());
         return;
     }
 
@@ -93,7 +92,7 @@ static void drawSudoku(SDL_Renderer *renderer, int sudoku[GRID_SIZE][GRID_SIZE],
 {
     drawGrid(renderer);
 
-    SDL_Color color1 = {0, 0, 0, 255}; // Couleur du texte
+    SDL_Color color1 = {0, 0, 0, 255}; 
     SDL_Color color2 = {255 , 0, 0, 255};
 
     for (int i = 0; i < GRID_SIZE; ++i) 
@@ -102,7 +101,7 @@ static void drawSudoku(SDL_Renderer *renderer, int sudoku[GRID_SIZE][GRID_SIZE],
         {
             if (sudoku[i][j] != 0) 
             {
-                if (sudokubase[i][j]==1)
+                if (sudokubase[i][j])
                     drawNumber(renderer, i, j, sudoku[i][j],color1);
                 else
                     drawNumber(renderer, i, j, sudoku[i][j],color2);
@@ -111,7 +110,7 @@ static void drawSudoku(SDL_Renderer *renderer, int sudoku[GRID_SIZE][GRID_SIZE],
     }
 }
 
-static int getmatrice1(int sudoku[GRID_SIZE][GRID_SIZE],char** argv)
+static int getMatriceSolved(int sudoku[GRID_SIZE][GRID_SIZE],char** argv)
 {
     char *filename = argv[1];
     FILE *fp = fopen(filename, "r");
@@ -129,7 +128,6 @@ static int getmatrice1(int sudoku[GRID_SIZE][GRID_SIZE],char** argv)
         {
             while ((ch = fgetc(fp)) != EOF && (ch < '0'|| ch>'9'))
             {}
-            printf("%d",ch);
             sudoku[i][j]=ch-'0';
 
         }
@@ -141,7 +139,7 @@ static int getmatrice1(int sudoku[GRID_SIZE][GRID_SIZE],char** argv)
     return 1;
 }
 
-static int getmatrice2(int sudoku[GRID_SIZE][GRID_SIZE],char** argv)
+static int getMatriceBase(int sudoku[GRID_SIZE][GRID_SIZE],char** argv)
 {
     char *filename = argv[2];
     FILE *fp = fopen(filename, "r");
@@ -162,7 +160,7 @@ static int getmatrice2(int sudoku[GRID_SIZE][GRID_SIZE],char** argv)
             if (ch=='.')
                 sudoku[i][j]=0;
             else
-                sudoku[i][j]=1;
+                sudoku[i][j]=ch-'0';
         }
     }
     
@@ -175,7 +173,7 @@ int main(int argc, char** argv)
 {
     if (argc!= 3)
     {
-        errx(EXIT_FAILURE,"Need 2 arguments");
+        errx(EXIT_FAILURE,"Use : ./result [solved grid] [base grid]");
     }
 
 
@@ -187,8 +185,8 @@ int main(int argc, char** argv)
 
     int sudoku[GRID_SIZE][GRID_SIZE] = {0};
     int sudokubase[GRID_SIZE][GRID_SIZE] ={0};
-    getmatrice1(sudoku,argv);
-    getmatrice2(sudokubase,argv);
+    getMatriceSolved(sudoku,argv);
+    getMatriceBase(sudokubase,argv);
 
     if (SDL_Init(SDL_INIT_VIDEO) < 0) 
     {
@@ -213,9 +211,13 @@ int main(int argc, char** argv)
         return 1;
     }
 
-    
+
+    drawSudoku(renderer,sudokubase,sudokubase);
+    savePNG(renderer,"gridbefore.png");
     drawSudoku(renderer, sudoku, sudokubase);
-    savePNG(renderer);
+    savePNG(renderer,"gridresult.png");
+    
+
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     

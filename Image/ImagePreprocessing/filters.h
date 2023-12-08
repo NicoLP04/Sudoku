@@ -8,7 +8,7 @@
 
 void surface_to_grayscale(SDL_Surface* surface);
 
-void surface_to_seuillage(SDL_Surface* surface,Uint8 seuil);
+void surface_to_threshold(SDL_Surface* surface,Uint8 seuil);
 
 void surface_to_invert(SDL_Surface* surface);
 
