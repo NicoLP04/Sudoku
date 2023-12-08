@@ -305,7 +305,7 @@ void init_weights()
 void print_results()
 {
 	char *setName = "TrainingSet/TestSet/";
-	size_t numImages = 233;
+	size_t numImages = 10;
 
 	// Get all the images from the training set of (TrainingSet/)
 	char **images = malloc(numImages * sizeof(char*));
@@ -337,7 +337,7 @@ void print_results()
 		int exp = *(name+20) - '0';
 
 		printf("For image %s, ", name);
-		printf("Expected %d, Predicted %d\n\n", exp, res);
+		printf("Expected %d, Predicted %d (%f)\n", exp, res, outputLayer[res] - 0.05f);
 
     if (exp == res)
       good++;
