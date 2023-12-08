@@ -112,7 +112,7 @@ static void drawSudoku(SDL_Renderer *renderer, int sudoku[GRID_SIZE][GRID_SIZE],
 
 static int getMatriceSolved(int sudoku[GRID_SIZE][GRID_SIZE],char** argv)
 {
-    char *filename = argv[1];
+    char *filename = argv[2];
     FILE *fp = fopen(filename, "r");
 
     if (fp == NULL)
@@ -141,7 +141,7 @@ static int getMatriceSolved(int sudoku[GRID_SIZE][GRID_SIZE],char** argv)
 
 static int getMatriceBase(int sudoku[GRID_SIZE][GRID_SIZE],char** argv)
 {
-    char *filename = argv[2];
+    char *filename = argv[1];
     FILE *fp = fopen(filename, "r");
 
     if (fp == NULL)
@@ -171,7 +171,7 @@ static int getMatriceBase(int sudoku[GRID_SIZE][GRID_SIZE],char** argv)
 
 int main(int argc, char** argv) 
 {
-    if (argc!= 3)
+    if (argc!= 3 && argc != 2)
     {
         errx(EXIT_FAILURE,"Use : ./result [solved grid] [base grid]");
     }
@@ -182,11 +182,14 @@ int main(int argc, char** argv)
         printf("SDL_ttf could not initialize! SDL_ttf Error: %s\n", TTF_GetError());
         return 1;
     }
-
-    int sudoku[GRID_SIZE][GRID_SIZE] = {0};
+    if (argc==3)
+    {
+        int sudoku[GRID_SIZE][GRID_SIZE] = {0};
+        getMatriceSolved(sudoku,argv);
+    }
     int sudokubase[GRID_SIZE][GRID_SIZE] ={0};
-    getMatriceSolved(sudoku,argv);
     getMatriceBase(sudokubase,argv);
+    
 
     if (SDL_Init(SDL_INIT_VIDEO) < 0) 
     {
@@ -214,9 +217,11 @@ int main(int argc, char** argv)
 
     drawSudoku(renderer,sudokubase,sudokubase);
     savePNG(renderer,"gridbefore.png");
-    drawSudoku(renderer, sudoku, sudokubase);
-    savePNG(renderer,"gridresult.png");
-    
+    if (argc==3)
+    {
+        drawSudoku(renderer, sudoku, sudokubase);
+        savePNG(renderer,"gridresult.png");
+    }
 
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
