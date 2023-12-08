@@ -70,7 +70,7 @@ int main(int argc, char** argv)
     }
     else if (seuil<210)
     {
-        surface_to_threshold(s,seuil);
+        surface_to_threshold(s,seuil-15);
     }
     else
     {
