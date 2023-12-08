@@ -1,2 +1,18 @@
-main: main.c
-	gcc -o main main.c `pkg-config --libs --cflags gtk+-3.0`
+# Makefile
+
+CC = gcc
+CFLAGS = `pkg-config --cflags gtk+-3.0` -Wall -O3
+LDLIBS = `pkg-config --libs gtk+-3.0`
+
+EXE = main interface
+
+all: $(EXE)
+
+$(foreach f, $(EXE), $(eval $(f):))
+
+.PHONY: clean
+
+clean:
+	${RM} $(EXE)
+
+# END
