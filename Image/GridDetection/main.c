@@ -1,3 +1,4 @@
+#include "Crop/crop.h"
 #include "grid.h"
 #include "houghtransform.h"
 #include "image.h"
