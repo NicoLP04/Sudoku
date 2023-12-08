@@ -284,7 +284,7 @@ HomographyMatrix computeHomography(double src[][2], double dst[][2]) {
     int k = 0;
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++, k++) {
-            H.matrix[i][j] += V[k];
+            H.matrix[i][j] = V[k];
         }
     }
 
