@@ -277,9 +277,7 @@ HomographyMatrix computeHomography(double src[][2], double dst[][2]) {
     for (int i = 0; i < 9; i++) {
         for (int j = 0; j < 9; j++) {
             V[i] += invA[i][j] * B[j];
-            printf("%f, ", V[i]);
         }
-        printf("\n");
     }
     int k = 0;
     for (int i = 0; i < 3; i++) {
@@ -287,8 +285,6 @@ HomographyMatrix computeHomography(double src[][2], double dst[][2]) {
             H.matrix[i][j] = V[k];
         }
     }
-
-    //H.matrix[2][2] = 1;
 
     return H;
 }
@@ -310,15 +306,6 @@ SDL_Surface *crop(SDL_Surface *image, double x1, double y1, double x2, double y2
     double H[3][3] = { 0 };
 
     invertMatrix_3x3(res.matrix, H);
-
-    // Print the homography matrix
-    printf("Homography Matrix:\n");
-    for (int i = 0; i < 3; i++) {
-        for (int j = 0; j < 3; j++) {
-            printf("%f\t", H[i][j]);
-        }
-        printf("\n");
-    }
 
 	  SDL_Surface *newImage = transposeImage(image, H, length);
 	  SDL_FreeSurface(image);
