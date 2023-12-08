@@ -62,6 +62,14 @@ int main(int argc, char** argv)
 	char* filename = argv[1];
 	if (filename[strlen(filename) - 1 - 5] == '1')
 	{
+
+		SDL_Surface* image = load_image(argv[1]);
+		if (image == NULL)
+		{
+			errx(EXIT_FAILURE, "%s", SDL_GetError());
+		}
+		IMG_SavePNG(image, "grid.png");
+
 		printf("No cropping neeeded !\n");
 		return EXIT_SUCCESS;
 	}
