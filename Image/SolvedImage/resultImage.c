@@ -182,9 +182,9 @@ int main(int argc, char** argv)
         printf("SDL_ttf could not initialize! SDL_ttf Error: %s\n", TTF_GetError());
         return 1;
     }
+    int sudoku[GRID_SIZE][GRID_SIZE] = {0};
     if (argc==3)
     {
-        int sudoku[GRID_SIZE][GRID_SIZE] = {0};
         getMatriceSolved(sudoku,argv);
     }
     int sudokubase[GRID_SIZE][GRID_SIZE] ={0};
