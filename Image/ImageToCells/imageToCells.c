@@ -208,8 +208,8 @@ void split(SDL_Surface *image, char *name)
 	          }
             if (y + yincrem <= height && x + xincrem <= width)
             {
-		            SDL_Surface *cell = SDL_CreateRGBSurface(0, xincrem, yincrem,
-				            32,0,0,0,0);
+		            SDL_Surface *cell = SDL_CreateRGBSurface(0, xincrem,
+							yincrem, 32,0,0,0,0);
 	            	Uint32* cellPixels = cell->pixels;
 
 	            	// copy pixels
@@ -242,7 +242,8 @@ void split(SDL_Surface *image, char *name)
 
 //		            free(cellName);
                 */
-                int val = predict(cell4, "NeuralNetwork/values"/*"../../NeuralNetwork/values"*/);
+                int val =
+	predict(cell4, "NeuralNetwork/values"/*"../../NeuralNetwork/values"*/);
                 if (val != 0)
                   fprintf(f, "%d", val);
                 else
