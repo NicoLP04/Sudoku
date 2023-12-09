@@ -17,6 +17,22 @@ After executing ``make`` at the root of the repository, you can use the interfac
 ```sh
 ./interface
 ```
+##### Page 1: 
+- button "Next step" -> goes to the next step
+- button "Choose image" -> open file explorer to choose an image
+- button "Solve !" -> do all the steps
+- button "Previous step" -> goes to previous step
+- button "Save final image" -> open file explorer to save final image
+
+#### Page 2:
+- button "Choose image" -> open file explorer to choose an image
+- button "Filter image" -> filter the image
+- button "Detect lines" -> apply Hough to detect lines
+- button "Rotate image" -> rotate image with given input
+- button "Solve" -> solve the image
+
+#### Page 3:
+- button "Update Modifications" -> Update grid values according to the textboxes
 
 ### SudokuSolver
 ```sh
