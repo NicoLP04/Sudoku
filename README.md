@@ -8,9 +8,15 @@ OCR Sudoku Solver by Team Prague
 
 - Clone the repo
 
-- Execute ``make`` at the root of the repository
+- Execute ``make`` at the root of the repository and use the interface
 
 ## Usage
+
+### Interface
+After executing ``make`` at the root of the repository, you can use the interface using:
+```sh
+./interface
+```
 
 ### SudokuSolver
 ```sh
@@ -19,13 +25,12 @@ OCR Sudoku Solver by Team Prague
 
 ### NeuralNetwork
 ```sh
-./NeuralNetwork --reset     # reset the neural network
-./NeuralNetwork --train     # train the neural network on xor function
 ./NeuralNetwork --predict   # see the results of neural network on different inputs
 ```
+
 ### Image/ImageToCells
 ```sh
-./ImageToCells grille.png     # cells are saved in the directory named Cells/
+./ImageToCells grille.png     # create a new file grid that contains the grid
 ```
 
 ### Image/ImagePreprocessing
@@ -37,8 +42,7 @@ OCR Sudoku Solver by Team Prague
 ```sh
 ./rotate ../ImageExamples/image_01.jpeg 37     # result named rotated.png
 ```
-
 ### Image/GridDetection
 ```sh
-./GridDetection ../ImageExamples/image_01.jpeg
+./GridDetection <a preprocessed image>    # create cropped image in grid.png
 ```
