@@ -1,0 +1,50 @@
+window {
+  background-color: red;
+  }
+
+
+
+  button {
+    background: blueviolet;
+    text-shadow: 1px 1px 5px yellow;
+    border-radius: 3px;
+    box-shadow: 0px 0px 5px black;
+
+}
+
+button:hover {
+  background: #3085a9;
+  text-shadow: 1px 1px 5px black;
+  padding: 10px 20px;
+  border-radius: 3px;
+  box-shadow: 0px 0px 5px black;
+
+}
+
+textview {
+    font-family: "Times New Roman", serif; /* Set the font family */
+    font-size: 24px; /* Set the font size */
+    color: purple; /* Set the text color */
+    background-color: red; /* Set the background color */
+    border: 1px solid red; /* Set a border */
+    padding: 8px; /* Add some padding */
+}
+
+/* Style the text inside the text view */
+textview text {
+    /* Additional text styling properties */
+}
+
+/* Apply additional styles when the text view is focused */
+textview:focus {
+    border-color: #4CAF50; /* Change border color on focus */
+    box-shadow: 0 0 5px rgba(76, 175, 80, 0.5); /* Add a box shadow on focus */
+}
+
+/* Apply additional styles to the selected text in the text view */
+textview selection {
+    background-color: #4CAF50; /* Set the background color of selected text */
+    color: white; /* Set the text color of selected text */
+}
+
+
