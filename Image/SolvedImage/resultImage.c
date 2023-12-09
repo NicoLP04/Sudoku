@@ -1,15 +1,15 @@
 #include "resultImage.h"
 
-static void drawGrid(SDL_Renderer *renderer) 
+static void drawGrid(SDL_Renderer *renderer)
 {
     SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
     SDL_RenderClear(renderer);
 
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     int k = 0;
-    for (int i = 0; i <= SCREEN_WIDTH; i += CELL_SIZE) 
-    { 
-        
+    for (int i = 0; i <= SCREEN_WIDTH; i += CELL_SIZE)
+    {
+
         if (k%3 == 0)
         {
             if(i!=SCREEN_WIDTH)
@@ -17,12 +17,12 @@ static void drawGrid(SDL_Renderer *renderer)
             if(i!=0)
                 SDL_RenderDrawLine(renderer, i-1, 0, i-1, SCREEN_HEIGHT);
         }
-        
+
         SDL_RenderDrawLine(renderer, i, 0, i, SCREEN_HEIGHT);
         k++;
     }
     k=0;
-    for (int j = 0; j <= SCREEN_HEIGHT; j += CELL_SIZE) 
+    for (int j = 0; j <= SCREEN_HEIGHT; j += CELL_SIZE)
     {
         if (k%3 == 0)
         {
@@ -35,18 +35,18 @@ static void drawGrid(SDL_Renderer *renderer)
                 SDL_RenderDrawLine(renderer, 0, j+1, SCREEN_WIDTH, j+1);
             }
         }
-        
+
         SDL_RenderDrawLine(renderer, 0, j, SCREEN_WIDTH, j);
         k++;
     }
 }
 
-static void savePNG(SDL_Renderer *renderer,char* name) 
+static void savePNG(SDL_Renderer *renderer,char* name)
 {
     SDL_Surface *surface =
 		SDL_CreateRGBSurface(0, SCREEN_WIDTH, SCREEN_HEIGHT, 32,
 				0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
-    if (surface == NULL) 
+    if (surface == NULL)
     {
         printf("Failed to create surface! SDL_Error: %s\n", SDL_GetError());
         return;
@@ -60,7 +60,7 @@ static void savePNG(SDL_Renderer *renderer,char* name)
 }
 
 static void drawNumber(SDL_Renderer *renderer, int row, int col,
-		int num,SDL_Color color) 
+		int num,SDL_Color color)
 {
     SDL_Surface *surface;
     SDL_Texture *texture;
@@ -70,8 +70,8 @@ static void drawNumber(SDL_Renderer *renderer, int row, int col,
     sprintf(text, "%d", num);
 
     TTF_Font *font =
-		TTF_OpenFont(/*"arial.ttf"*/"Image/SolvedImage/arial.ttf", 28); 
-    if (!font) 
+		TTF_OpenFont(/*"arial.ttf"*/"Image/SolvedImage/arial.ttf", 28);
+    if (!font)
     {
         printf("Error getting the font : %s\n", TTF_GetError());
         return;
@@ -93,24 +93,24 @@ static void drawNumber(SDL_Renderer *renderer, int row, int col,
 }
 
 static void drawSudoku(SDL_Renderer *renderer,
-		int sudoku[GRID_SIZE][GRID_SIZE],int sudokubase[GRID_SIZE][GRID_SIZE]) 
+		int sudoku[GRID_SIZE][GRID_SIZE],int sudokubase[GRID_SIZE][GRID_SIZE])
 {
     drawGrid(renderer);
 
-    SDL_Color color1 = {0, 0, 0, 255}; 
+    SDL_Color color1 = {0, 0, 0, 255};
     SDL_Color color2 = {255 , 0, 0, 255};
 
-    for (int i = 0; i < GRID_SIZE; ++i) 
+    for (int i = 0; i < GRID_SIZE; ++i)
     {
-        for (int j = 0; j < GRID_SIZE; ++j) 
+        for (int j = 0; j < GRID_SIZE; ++j)
         {
-            if (sudoku[i][j] != 0) 
+            if (sudoku[i][j] != 0)
             {
                 if (sudokubase[i][j])
                     drawNumber(renderer, i, j, sudoku[i][j],color1);
                 else
                     drawNumber(renderer, i, j, sudoku[i][j],color2);
-            }   
+            }
         }
     }
 }
@@ -127,9 +127,9 @@ static int getMatriceSolved(int sudoku[GRID_SIZE][GRID_SIZE],char** argv)
     }
 
     char ch;
-    for (int i = 0; i < GRID_SIZE; ++i) 
+    for (int i = 0; i < GRID_SIZE; ++i)
     {
-        for (int j = 0; j < GRID_SIZE; ++j) 
+        for (int j = 0; j < GRID_SIZE; ++j)
         {
             while ((ch = fgetc(fp)) != EOF && (ch < '0'|| ch>'9'))
             {}
@@ -137,7 +137,7 @@ static int getMatriceSolved(int sudoku[GRID_SIZE][GRID_SIZE],char** argv)
 
         }
     }
-    
+
 
     fclose(fp);
 
@@ -156,9 +156,9 @@ static int getMatriceBase(int sudoku[GRID_SIZE][GRID_SIZE],char** argv)
     }
 
     char ch;
-    for (int i = 0; i < GRID_SIZE; ++i) 
+    for (int i = 0; i < GRID_SIZE; ++i)
     {
-        for (int j = 0; j < GRID_SIZE; ++j) 
+        for (int j = 0; j < GRID_SIZE; ++j)
         {
             while ((ch = fgetc(fp)) != EOF && (ch < '0'|| ch>'9') && ch!= '.')
             {}
@@ -168,13 +168,13 @@ static int getMatriceBase(int sudoku[GRID_SIZE][GRID_SIZE],char** argv)
                 sudoku[i][j]=ch-'0';
         }
     }
-    
+
     fclose(fp);
 
     return 1;
 }
 
-int main(int argc, char** argv) 
+int main(int argc, char** argv)
 {
     if (argc!= 3 && argc != 2)
     {
@@ -182,7 +182,7 @@ int main(int argc, char** argv)
     }
 
 
-    if (TTF_Init() < 0) 
+    if (TTF_Init() < 0)
     {
         printf("SDL_ttf could not initialize! SDL_ttf Error: %s\n",
 				TTF_GetError());
@@ -195,9 +195,9 @@ int main(int argc, char** argv)
     }
     int sudokubase[GRID_SIZE][GRID_SIZE] ={0};
     getMatriceBase(sudokubase,argv);
-    
 
-    if (SDL_Init(SDL_INIT_VIDEO) < 0) 
+
+    if (SDL_Init(SDL_INIT_VIDEO) < 0)
     {
         printf("SDL could not initialize! SDL_Error: %s\n", SDL_GetError());
         return 1;
@@ -209,14 +209,14 @@ int main(int argc, char** argv)
 			SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT,
 			SDL_WINDOW_HIDDEN);
 
-    if (window == NULL) 
+    if (window == NULL)
     {
         printf("Window could not be created! SDL_Error: %s\n", SDL_GetError());
         return 1;
     }
 
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
-    if (renderer == NULL) 
+    if (renderer == NULL)
     {
         printf("Renderer could not be created! SDL_Error: %s\n",
 				SDL_GetError());
@@ -234,8 +234,8 @@ int main(int argc, char** argv)
 
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
-    
-    
+
+
     SDL_Quit();
     TTF_Quit();
 

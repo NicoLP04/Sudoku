@@ -113,7 +113,7 @@ void train(long epochs, double lr, char *file, size_t numImages)
 			indexes[b] = b;
 
 		shuffle(indexes, numImages);
-		
+
 		for (size_t j = 0; j < numImages; j++)
 		{
 			// get training set and target output
