@@ -6,5 +6,6 @@ SUBDIRS := ./SudokuSolver/ ./NeuralNetwork/ ./Image/GridDetection/ ./Image/Image
 $(TOPTARGETS): $(SUBDIRS)
 $(SUBDIRS):
 	$(MAKE) -C $@ $(MAKECMDGOALS)
+	rm -rf interface *.png *.jpeg grid grid.result
 
 .PHONY: $(TOPTARGETS) $(SUBDIRS)
