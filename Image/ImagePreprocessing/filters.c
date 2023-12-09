@@ -31,14 +31,14 @@ void surface_to_grayscale(SDL_Surface* surface)
 
 // ***************      THRESHOLDING    *****************
 
-static Uint32 pixel_to_threshold(Uint32 pixel_color, Uint8 seuil,
+static Uint32 pixel_to_threshold(Uint32 pixel_color, Uint8 threshold,
 		SDL_PixelFormat* format)
 {
 	Uint8 r, g, b;
 	SDL_GetRGB(pixel_color, format, &r, &g, &b);
 
 	Uint8 average = (r + g + b)/3;
-    if (average<seuil)
+    if (average<threshold)
     {
         average=0;
     }
@@ -49,7 +49,7 @@ static Uint32 pixel_to_threshold(Uint32 pixel_color, Uint8 seuil,
 	return SDL_MapRGB(format, average, average, average);
 }
 
-void surface_to_threshold(SDL_Surface* surface, Uint8 seuil)
+void surface_to_threshold(SDL_Surface* surface, Uint8 threshold)
 {
     Uint32* pixels = surface->pixels;
 	int len = surface->w * surface->h;
@@ -61,7 +61,7 @@ void surface_to_threshold(SDL_Surface* surface, Uint8 seuil)
 
 
 	for(int i=0; i<len; ++i)
-		pixels[i] = pixel_to_threshold(pixels[i],seuil, format);
+		pixels[i] = pixel_to_threshold(pixels[i],threshold, format);
 
 	SDL_UnlockSurface(surface);
 }

@@ -37,14 +37,15 @@ void set_pixel(SDL_Surface* surface, int x, int y, Uint32 pixel) {
     }
 }
 
-SDL_Surface* transposeImage(SDL_Surface* inputImage, double matrix[3][3], double length) {
+SDL_Surface* transposeImage(SDL_Surface* inputImage, double matrix[3][3],
+		double length) {
     // Create a new surface for the transposed image
     SDL_Surface* outputImage = SDL_CreateRGBSurface(0, length, length,
-                                                   inputImage->format->BitsPerPixel,
-                                                   inputImage->format->Rmask,
-                                                   inputImage->format->Gmask,
-                                                   inputImage->format->Bmask,
-                                                   inputImage->format->Amask);
+                                            inputImage->format->BitsPerPixel,
+                                            inputImage->format->Rmask,
+                                            inputImage->format->Gmask,
+                                            inputImage->format->Bmask,
+                                            inputImage->format->Amask);
 
     if (outputImage == NULL) {
         fprintf(stderr, "Unable to create surface: %s\n", SDL_GetError());
@@ -56,8 +57,10 @@ SDL_Surface* transposeImage(SDL_Surface* inputImage, double matrix[3][3], double
         for (int xo = 0; xo < outputImage->w; ++xo) {
             double idk = xo * matrix[2][0] + yo * matrix[2][1] + matrix[2][2];
             //printf("%f\n", idk);
-            int x = (xo * matrix[0][0] + yo * matrix[0][1] + matrix[0][2]) / idk;
-            int y = (xo * matrix[1][0] + yo * matrix[1][1] + matrix[1][2]) / idk;
+            int x =
+				(xo * matrix[0][0] + yo * matrix[0][1] + matrix[0][2]) / idk;
+            int y =
+				(xo * matrix[1][0] + yo * matrix[1][1] + matrix[1][2]) / idk;
 
             if (x >= 0 && y >= 0 && x < inputImage->w && y < inputImage->h)
             {
@@ -232,7 +235,8 @@ void Inverse(double cinMatrix[9][9], int sizeMatrix, double determinte,
     return;
 }
 
-void inverseMat(double cinMatrix[9][9], double coutMatrix[9][9], int sizeMatrix)
+void inverseMat(double cinMatrix[9][9], double coutMatrix[9][9],
+		int sizeMatrix)
 {
     double determinte, transposeMatrix[9][9];
 
@@ -289,8 +293,8 @@ HomographyMatrix computeHomography(double src[][2], double dst[][2]) {
     return H;
 }
 
-SDL_Surface *crop(SDL_Surface *image, double x1, double y1, double x2, double y2,
-    double x3, double y3, double x4, double y4)
+SDL_Surface *crop(SDL_Surface *image, double x1, double y1,
+		double x2, double y2, double x3, double y3, double x4, double y4)
 {
     double src[][2] = {{x1, y1}, {x2, y2}, {x3, y3}, {x4, y4}};
 
@@ -313,19 +317,4 @@ SDL_Surface *crop(SDL_Surface *image, double x1, double y1, double x2, double y2
     return newImage;
 }
 
-/*
-int main(int argc, char** argv) {
-    SDL_Surface *image = load_image(argv[1]);
-    printf("%d, %d\n", image->w, image->h);
-
-    //SDL_Surface* newImage = crop(image, 335, 214, 1149, 207, 1159, 1028, 337, 1030); // 2
-    //SDL_Surface* newImage = crop(image, 128, 88, 649, 87, 650, 607, 130, 608); // 3
-    //SDL_Surface* newImage = crop(image, 408, 164, 1524, 189, 1541, 1306, 419, 1310); // 4
-    //SDL_Surface* newImage = crop(image, 625, 179, 1367, 694, 849, 1434, 110, 915); // 5
-    SDL_Surface* newImage = crop(image, 64, 52, 1959, 54, 2102, 1848, 24, 1932); // 6
-    IMG_SavePNG(newImage, "RESULT.png");
-	  SDL_FreeSurface(newImage);
-    return 0;
-}
-*/
 

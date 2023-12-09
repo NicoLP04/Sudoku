@@ -34,14 +34,14 @@ int main(int argc, char **argv)
 		print_results();
 	}
 	else if (strcmp(argv[1], "--train") == 0)
-	{	
+	{
 		if (argc > 4)
 			exit_help();
 
 		int epochs = 100;
 		double lr = 0.001f;
 		char *endptr;
-	
+
 		if (argc >= 3)
 			epochs = atoi(argv[2]);
 		if (argc == 4)
@@ -50,10 +50,10 @@ int main(int argc, char **argv)
 			if (*endptr != 0)
 				exit_help();
 		}
-	
+
     size_t num = 233;
 		train(epochs, lr, "values", num);
-	
+
 		printf("Neural network successfully trained with parameters: \n");
 		printf("epochs = %d && lr = %f\n", epochs, lr);
 	}
