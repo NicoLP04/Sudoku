@@ -1,5 +1,4 @@
 #define _GNU_SOURCE
-
 #include <gtk/gtk.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <stdio.h>
@@ -8,7 +7,6 @@
 #include <unistd.h>
 #include <stddef.h>
 #include <ctype.h>
-
 
 typedef enum State
 {
@@ -286,7 +284,7 @@ strlen(demo ? ACTUAL_FILE_SECONDARY : ACTUAL_FILE) + 1;
     {
         return;
     }
-    size_t buffer_size2 = strlen("./Image/SolvedImage/Result ") + 
+    size_t buffer_size2 = strlen("./Image/SolvedImage/Result ")+
     strlen("grid") + 1;
     char* buffer2 = (char *)malloc(buffer_size2);
     snprintf(buffer2, buffer_size2 * sizeof(char), 
@@ -328,9 +326,7 @@ void handle_filter(GtkWidget* widget, gpointer data)
     num = (demo ? ACTUAL_FILE_SECONDARY : ACTUAL_FILE)[i - 1];
     char* filename = NULL;
     asprintf(&filename, "image_%c.jpeg", num);
-
 strcpy(FILTERED_IMAGE, filename);
-
     size_t buffer_size = strlen("./Image/ImagePreprocessing/PreProcessing ")
 + strlen(demo ? ACTUAL_FILE_SECONDARY : ACTUAL_FILE) + 1;
     char* buffer = (char *)malloc(buffer_size);
@@ -364,7 +360,7 @@ demo ? ACTUAL_FILE_SECONDARY : ACTUAL_FILE);
             g_print("Error creating GdkPixbuf from image.jpeg\n");
 	g_object_unref(pixbuf);
     }
-    else 
+    else
         g_print("External program execution failed with status: %d\n", status);
 }
 
@@ -659,9 +655,7 @@ void next_step_other(GtkWidget* widget, gpointer data)
             ui->state = DETECT_LINES;
 	    char* p = NULL;
 	    if (asprintf(&p, "GUI/FullDemoImages/%s", FILTERED_IMAGE) == 0)
-        {
-
-        }
+	    {}
 	    pixbuf =
 create_and_set_pixbuf(p, data);
             break;
@@ -714,9 +708,34 @@ int demo = ui->demo_state == PartialDemo;
     }
 }
 
+
+void save_image(GtkWidget* widget, gpointer data)
+{
+	UserInterface* ui = data;
+	GtkFileChooserAction action = GTK_FILE_CHOOSER_ACTION_SAVE;
+	gint res;
+	GtkWidget* dialog = gtk_file_chooser_dialog_new
+("Save File", GTK_WINDOW(ui->window), action,
+"_Cancel", GTK_RESPONSE_CANCEL, "_Save", GTK_RESPONSE_ACCEPT, NULL);
+	gtk_file_chooser_set_current_name
+(GTK_FILE_CHOOSER(dialog), "sudoku.png");
+	res = gtk_dialog_run(GTK_DIALOG(dialog));
+	if (res == GTK_RESPONSE_ACCEPT)
+	{
+		char* filename;
+		GtkFileChooser* chooser = GTK_FILE_CHOOSER(dialog);
+		filename = gtk_file_chooser_get_filename(chooser);
+		const char* source = "GUI/FullDemoImages/gridresult.png";
+		rename(source, filename);
+		g_free(filename);
+	}
+	gtk_widget_destroy(dialog);
+}
+
 void apply_dynamic_style(GtkWidget *widget, GtkCssProvider* provider) {
     GtkStyleContext *context = gtk_widget_get_style_context(widget);
-    gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+    gtk_style_context_add_provider(context,
+GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
 }
 
 
@@ -743,7 +762,7 @@ int main(int argc, char *argv[]) {
     GtkButton* crop_button;
     GtkButton* next;
     GtkButton* previous;
-
+    GtkButton* save_button;
     if (argc < 2)
     {
         printf("missing image\n");
@@ -776,16 +795,19 @@ int main(int argc, char *argv[]) {
     GtkWidget* notebook =
 GTK_WIDGET(gtk_builder_get_object(builder, "notebook1"));
     window = GTK_WINDOW(gtk_builder_get_object(builder, "main_window"));
-    //grid = GTK_WIDGET(gtk_builder_get_object(builder, "grid_full"));
-    //grid_partial = GTK_WIDGET(gtk_builder_get_object(builder, "grid_partial"));
     nex_button = GTK_WIDGET(gtk_builder_get_object(builder, "next_step"));
     all_button = GTK_BUTTON(gtk_builder_get_object(builder, "all_step"));
-    file_explorer_button = GTK_BUTTON(gtk_builder_get_object(builder, "open_explorer"));
-    crop_button = GTK_BUTTON(gtk_builder_get_object(builder, "solve_button"));
-    update_button = GTK_BUTTON(gtk_builder_get_object(builder, "update_button"));
-
-    open_button_secondary = GTK_BUTTON(gtk_builder_get_object(builder, "open_explorer_second"));
-    secondary_image = GTK_WIDGET(gtk_builder_get_object(builder, "image_displayed1"));
+    file_explorer_button =
+GTK_BUTTON(gtk_builder_get_object(builder, "open_explorer"));
+    crop_button = GTK_BUTTON(gtk_builder_get_object
+(builder, "solve_button"));
+    update_button = GTK_BUTTON(gtk_builder_get_object
+(builder, "update_button"));
+    save_button = GTK_BUTTON(gtk_builder_get_object(builder, "save"));
+    open_button_secondary = GTK_BUTTON(gtk_builder_get_object
+(builder, "open_explorer_second"));
+    secondary_image =
+GTK_WIDGET(gtk_builder_get_object(builder, "image_displayed1"));
     image = GTK_WIDGET(gtk_builder_get_object(builder, "image_displayed"));
     text_view = GTK_WIDGET(gtk_builder_get_object(builder, "text_view"));
     text_view_image = GTK_WIDGET(gtk_builder_get_object
@@ -803,7 +825,8 @@ GTK_WIDGET(gtk_builder_get_object(builder, "notebook1"));
     set_text_and_center(GTK_TEXT_VIEW(text_view_image), ACTUAL_FILE, -1);
     UserInterface ui = {
                 .grid_for_modifier = grid_for_modifier,
-                .text_view_image_secondary = GTK_TEXT_VIEW(text_view_secondary),
+                .text_view_image_secondary =
+GTK_TEXT_VIEW(text_view_secondary),
                 .displayed_image_secondary = secondary_image,
                 .text_view_image = GTK_TEXT_VIEW(text_view_image),
                 .demo_state = FullDemo,
@@ -826,10 +849,11 @@ GTK_WIDGET(gtk_builder_get_object(builder, "notebook1"));
 		index[0] = i;
 		index[1] = j;
             GtkWidget *text_entry = gtk_entry_new();
-            gtk_entry_set_alignment(GTK_ENTRY(text_entry), 0.5); // Center the text
-            gtk_widget_set_size_request(text_entry, 25, 5); // Set the size of the text entry
+            gtk_entry_set_alignment(GTK_ENTRY(text_entry), 0.5);
+            gtk_widget_set_size_request(text_entry, 25, 5);
             gtk_grid_attach(grid_for_modifier, text_entry,j,i , 1, 1);
-            g_signal_connect(G_OBJECT(text_entry), "changed", G_CALLBACK(entry_changed), index);
+            g_signal_connect(G_OBJECT(text_entry),
+"changed", G_CALLBACK(entry_changed), index);
         }
     }
     gtk_grid_set_row_spacing(grid_for_modifier, 0);
@@ -839,30 +863,28 @@ GTK_WIDGET(gtk_builder_get_object(builder, "notebook1"));
     gtk_widget_set_valign(GTK_WIDGET(grid_for_modifier), GTK_ALIGN_CENTER);
     g_signal_connect(next, "clicked", G_CALLBACK(next_step_other), &ui);
     g_signal_connect(previous, "clicked", G_CALLBACK(previous_step), &ui);
-    g_signal_connect((update_button), "clicked", G_CALLBACK(update_sudoku_image), &ui);
-    g_signal_connect(G_OBJECT(scale), "value-changed", G_CALLBACK(on_scale_value_changed), &ui);
-    g_signal_connect(G_OBJECT(notebook), "switch-page", G_CALLBACK(on_tab_switched), &ui);
-    g_signal_connect(filter_button, "clicked", G_CALLBACK(filter_button_handler), &ui);
-    g_signal_connect(detect_lines_button, "clicked", G_CALLBACK(handle_grid_detection), &ui);
-    g_signal_connect(rotate_button, "clicked", G_CALLBACK(rotate_button_handler), &ui);
+    g_signal_connect((update_button), "clicked",
+G_CALLBACK(update_sudoku_image), &ui);
+    g_signal_connect(G_OBJECT(scale), "value-changed",
+G_CALLBACK(on_scale_value_changed), &ui);
+    g_signal_connect(G_OBJECT(notebook), "switch-page",
+G_CALLBACK(on_tab_switched), &ui);
+    g_signal_connect(filter_button, "clicked",
+G_CALLBACK(filter_button_handler), &ui);
+    g_signal_connect(detect_lines_button, "clicked",
+G_CALLBACK(handle_grid_detection), &ui);
+    g_signal_connect(rotate_button, "clicked",
+G_CALLBACK(rotate_button_handler), &ui);
     g_signal_connect(solve_button, "clicked", G_CALLBACK(solve_button), &ui);
     g_signal_connect(crop_button, "clicked", G_CALLBACK(solve_button), &ui);
-
-
-    
-
-
+    g_signal_connect(save_button, "clicked", G_CALLBACK(save_image), &ui);
     GtkCssProvider *provider = gtk_css_provider_new();
-
     gtk_css_provider_load_from_path(provider, "style.css", NULL);
-
 apply_dynamic_style(GTK_WIDGET(text_view), provider);
 apply_dynamic_style(GTK_WIDGET(text_view_image), provider);
 apply_dynamic_style(GTK_WIDGET(window), provider);
-
-
    apply_dynamic_style(GTK_WIDGET(open_button_secondary), provider);
-
+    apply_dynamic_style(GTK_WIDGET(save_button), provider);
     apply_dynamic_style(GTK_WIDGET(crop_button), provider);
     apply_dynamic_style(GTK_WIDGET(filter_button), provider);
     apply_dynamic_style(GTK_WIDGET(update_button), provider);
@@ -874,18 +896,6 @@ apply_dynamic_style(GTK_WIDGET(window), provider);
     apply_dynamic_style(GTK_WIDGET(nex_button), provider);
     apply_dynamic_style(GTK_WIDGET(solve_button), provider);
     apply_dynamic_style(GTK_WIDGET(detect_lines_button), provider);
-
-
-
-
-    /*GtkStyleContext *context = gtk_widget_get_style_context((all_button));
-    gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-    context = gtk_widget_get_style_context((nex_button));
-    gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-    context = gtk_widget_get_style_context(GTK_WIDGET(window));
-    gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);*/
-
-
     GdkPixbuf *pixbuf = create_and_set_pixbuf(filename, &ui);
     g_object_unref(pixbuf);
     ui.demo_state = PartialDemo;
@@ -893,18 +903,18 @@ apply_dynamic_style(GTK_WIDGET(window), provider);
     g_object_unref(pixbuf2);
     ui.demo_state = FullDemo;
     const GdkPixbuf *pb = gtk_image_get_pixbuf(GTK_IMAGE(image));
-
     IMAGE_WIDTH = gdk_pixbuf_get_width(pb);
     IMAGE_HEIGHT = gdk_pixbuf_get_height(pb);
-
     g_signal_connect(all_button, "clicked", G_CALLBACK(all_step), &ui);
-    g_signal_connect(file_explorer_button, "clicked", G_CALLBACK(choose_image), &ui);
-
-    g_signal_connect(open_button_secondary, "clicked", G_CALLBACK(choose_image), &ui);
+    g_signal_connect(file_explorer_button,
+"clicked", G_CALLBACK(choose_image), &ui);
+    g_signal_connect(open_button_secondary,
+"clicked", G_CALLBACK(choose_image), &ui);
     g_signal_connect(nex_button, "clicked", G_CALLBACK(next_step_button), &ui);
     g_signal_connect(window, "configure-event", G_CALLBACK(on_configure), &ui);
     gtk_widget_show_all(GTK_WIDGET(window));
-    g_signal_connect(G_OBJECT(window), "destroy", G_CALLBACK(gtk_main_quit), NULL);
+    g_signal_connect(G_OBJECT(window), "destroy",
+G_CALLBACK(gtk_main_quit), NULL);
     gtk_main();
     return 0;
 }
