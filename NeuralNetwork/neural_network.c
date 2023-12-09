@@ -339,8 +339,12 @@ void print_results()
 		int exp = *(name+20) - '0';
 
 		printf("For image %s, ", name);
-		printf("Expected %d, Predicted %d (%f)\n",
-				exp, res, outputLayer[res] - 0.05f);
+		if (res != 0)
+			printf("Expected %d, Predicted %d (%f)\n",
+				exp, res, outputLayer[res] - 0.03f);
+		else
+			printf("Expected %d, Predicted %d (%f)\n",
+				exp, res, outputLayer[res]);
 
     if (exp == res)
       good++;
