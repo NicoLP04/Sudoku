@@ -45,7 +45,7 @@ int main(int argc, char** argv)
     //printf("****Applying Grayscale*****\n") ;
 	surface_to_grayscale(s);
 
-    Uint8 seuil = getaverage(s);
+    Uint8 threshold = getaverage(s);
 
     int histo[256] = {0};
     int* histogram = gethistogram(s,histo);
@@ -54,23 +54,23 @@ int main(int argc, char** argv)
     //printf("****Applying Median*****\n") ;
     surface_to_median(s);
     //printf("****Applying Threshold*****\n") ;
-    printf("%d\n",seuil);
-    if (seuil<150)
+    //printf("%d\n",threshold);
+    if (threshold<150)
     {
-        surface_to_threshold(s,seuil+20);
+        surface_to_threshold(s,threshold+20);
     }
 
-    else if (seuil <175)
+    else if (threshold <175)
     {
-        surface_to_threshold(s,seuil-(255-seuil));
+        surface_to_threshold(s,threshold-(255-threshold));
     }
-    else if (seuil <190)
+    else if (threshold <190)
     {
-        surface_to_threshold(s,seuil-50);
+        surface_to_threshold(s,threshold-50);
     }
-    else if (seuil<210)
+    else if (threshold<210)
     {
-        surface_to_threshold(s,seuil-15);
+        surface_to_threshold(s,threshold-15);
     }
     else
     {

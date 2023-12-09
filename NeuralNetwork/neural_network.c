@@ -23,7 +23,8 @@ SDL_Surface* load_image(const char* path)
     SDL_Surface* temp = IMG_Load(path);
     if (temp  == NULL)
         errx(EXIT_FAILURE, "%s", SDL_GetError());
-    SDL_Surface* newsurf = SDL_ConvertSurfaceFormat(temp,SDL_PIXELFORMAT_RGB888,0);
+    SDL_Surface* newsurf =
+		SDL_ConvertSurfaceFormat(temp,SDL_PIXELFORMAT_RGB888,0);
     if (newsurf  == NULL)
         errx(EXIT_FAILURE, "%s", SDL_GetError());
     SDL_FreeSurface(temp);
@@ -158,7 +159,8 @@ void train(long epochs, double lr, char *file, size_t numImages)
 			// backpropagation
 			double derrors[numOutputs];
 			for (size_t k = 0; k < numOutputs; k++)
-				derrors[k] = (targets[k] - outputLayer[k]); 	//* sigmoid_prime(outputLayer[k]);
+				derrors[k] = (targets[k] - outputLayer[k]);
+			//* sigmoid_prime(outputLayer[k]);
 
 			double dhidden[numHiddens];
 			for (size_t k = 0; k < numHiddens; k++)
@@ -337,7 +339,8 @@ void print_results()
 		int exp = *(name+20) - '0';
 
 		printf("For image %s, ", name);
-		printf("Expected %d, Predicted %d (%f)\n", exp, res, outputLayer[res] - 0.05f);
+		printf("Expected %d, Predicted %d (%f)\n", exp, res,
+				outputLayer[res] - 0.05f);
 
     if (exp == res)
       good++;

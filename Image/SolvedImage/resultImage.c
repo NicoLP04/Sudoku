@@ -43,21 +43,24 @@ static void drawGrid(SDL_Renderer *renderer)
 
 static void savePNG(SDL_Renderer *renderer,char* name) 
 {
-    SDL_Surface *surface = SDL_CreateRGBSurface(0, SCREEN_WIDTH, SCREEN_HEIGHT, 32,
-                                                0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
+    SDL_Surface *surface =
+		SDL_CreateRGBSurface(0, SCREEN_WIDTH, SCREEN_HEIGHT, 32,
+				0x00FF0000, 0x0000FF00, 0x000000FF, 0xFF000000);
     if (surface == NULL) 
     {
         printf("Failed to create surface! SDL_Error: %s\n", SDL_GetError());
         return;
     }
 
-    SDL_RenderReadPixels(renderer, NULL, SDL_PIXELFORMAT_ARGB8888, surface->pixels, surface->pitch);
+    SDL_RenderReadPixels(renderer, NULL, SDL_PIXELFORMAT_ARGB8888,
+			surface->pixels, surface->pitch);
     SDL_SaveBMP(surface, name);
 
     SDL_FreeSurface(surface);
 }
 
-static void drawNumber(SDL_Renderer *renderer, int row, int col, int num,SDL_Color color) 
+static void drawNumber(SDL_Renderer *renderer, int row, int col,
+		int num,SDL_Color color) 
 {
     SDL_Surface *surface;
     SDL_Texture *texture;
@@ -66,7 +69,8 @@ static void drawNumber(SDL_Renderer *renderer, int row, int col, int num,SDL_Col
     char text[2];
     sprintf(text, "%d", num);
 
-    TTF_Font *font = TTF_OpenFont(/*"arial.ttf"*/"Image/SolvedImage/arial.ttf", 28); 
+    TTF_Font *font =
+		TTF_OpenFont(/*"arial.ttf"*/"Image/SolvedImage/arial.ttf", 28); 
     if (!font) 
     {
         printf("Error getting the font : %s\n", TTF_GetError());
@@ -88,7 +92,8 @@ static void drawNumber(SDL_Renderer *renderer, int row, int col, int num,SDL_Col
     TTF_CloseFont(font);
 }
 
-static void drawSudoku(SDL_Renderer *renderer, int sudoku[GRID_SIZE][GRID_SIZE],int sudokubase[GRID_SIZE][GRID_SIZE]) 
+static void drawSudoku(SDL_Renderer *renderer,
+		int sudoku[GRID_SIZE][GRID_SIZE],int sudokubase[GRID_SIZE][GRID_SIZE]) 
 {
     drawGrid(renderer);
 
@@ -179,7 +184,8 @@ int main(int argc, char** argv)
 
     if (TTF_Init() < 0) 
     {
-        printf("SDL_ttf could not initialize! SDL_ttf Error: %s\n", TTF_GetError());
+        printf("SDL_ttf could not initialize! SDL_ttf Error: %s\n",
+				TTF_GetError());
         return 1;
     }
     int sudoku[GRID_SIZE][GRID_SIZE] = {0};
@@ -199,7 +205,9 @@ int main(int argc, char** argv)
     SDL_Window *window = NULL;
     SDL_Renderer *renderer = NULL;
 
-    window = SDL_CreateWindow("Sudoku Renderer", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_HIDDEN);
+    window = SDL_CreateWindow("Sudoku Renderer", SDL_WINDOWPOS_UNDEFINED,
+			SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT,
+			SDL_WINDOW_HIDDEN);
 
     if (window == NULL) 
     {
@@ -210,7 +218,8 @@ int main(int argc, char** argv)
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
     if (renderer == NULL) 
     {
-        printf("Renderer could not be created! SDL_Error: %s\n", SDL_GetError());
+        printf("Renderer could not be created! SDL_Error: %s\n",
+				SDL_GetError());
         return 1;
     }
 

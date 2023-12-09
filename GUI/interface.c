@@ -49,7 +49,11 @@ typedef struct UserInterface
 } UserInterface;
 
 
-#define INTRO_TEXT ("Welcome to the OCR sudoku solver.\n-Select your sudoku image from your files\n- Use the next step button to proceed to the next step \nof the resolution of your sudoku\n- Enjoy !\nIn case no images are selected, you can use the provided example")
+#define INTRO_TEXT ("Welcome to the OCR sudoku solver.\n-Select " \
+		"your sudoku image from your files\n- Use the next step " \
+		"button to proceed to the next step \nof the resolution " \
+		"of your sudoku\n- Enjoy !\nIn case no images are selected, " \
+		"you can use the provided example")
 
 #define MAX_FILE_PATH 256
 
@@ -85,7 +89,7 @@ void setup_solver(gpointer data)
         printf("Error: could not open file %s\n", filename);
         return;
     }
-    for (int i = 0; i < 9; i++) 
+    for (int i = 0; i < 9; i++)
     {
             for (int j = 0; j < 9; j++)
             {
@@ -93,7 +97,7 @@ void setup_solver(gpointer data)
             }
     }
 
-        for (int i = 0; i < 9; i++) 
+        for (int i = 0; i < 9; i++)
         {
             for (int j = 0; j < 9; j++)
             {
@@ -158,7 +162,7 @@ GdkPixbuf *create_and_set_pixbuf(const gchar *filename, gpointer user_data)
     h = IMAGE_HEIGHT;
     w = (gdk_pixbuf_get_width(pixbuf) * h)/gdk_pixbuf_get_height(pixbuf);
     pixbuf_scale = gdk_pixbuf_scale_simple(pixbuf, w, h, GDK_INTERP_BILINEAR);
-    if (w < IMAGE_WIDTH) 
+    if (w < IMAGE_WIDTH)
     {
         x = (IMAGE_WIDTH - w) / 2;
         gtk_layout_move(GTK_LAYOUT(demo ? ui->displayed_image_secondary :
@@ -199,7 +203,7 @@ void choose_image(GtkWidget *button, gpointer user_data)
 {
     UserInterface* ui = user_data;
     ui->state = FILTER;
-    GtkWidget *dialog = 
+    GtkWidget *dialog =
 gtk_file_chooser_dialog_new("Open Image",
 GTK_WINDOW(gtk_widget_get_toplevel(button)),
 GTK_FILE_CHOOSER_ACTION_OPEN,
@@ -287,7 +291,7 @@ strlen(demo ? ACTUAL_FILE_SECONDARY : ACTUAL_FILE) + 1;
     size_t buffer_size2 = strlen("./Image/SolvedImage/Result ")+
     strlen("grid") + 1;
     char* buffer2 = (char *)malloc(buffer_size2);
-    snprintf(buffer2, buffer_size2 * sizeof(char), 
+    snprintf(buffer2, buffer_size2 * sizeof(char),
 "./Image/SolvedImage/Result %s","grid");
     status = system(buffer2);
     g_free(buffer);
@@ -351,7 +355,9 @@ demo ? ACTUAL_FILE_SECONDARY : ACTUAL_FILE);
         asprintf(&buffer3, "%s%s", demo ? FILTER_RES_PARTIAL
 : FILTER_RES_FULL, buffer2 );
         set_text_and_center(ui->text_view,
-"Succesfully filtered image. \n\nApplied : \n\n - Grayscale\n\n - Contrast\n\n - Median\n\n - Threshold\n\n - Invert", 100);
+"Succesfully filtered image. \n\nApplied :
+\n\n - Grayscale\n\n - Contrast\n\n - Median\n\n - Threshold\n\n
+- Invert", 100);
         g_print("External program executed successfully!\n");
         strcpy(demo ? ACTUAL_FILE_SECONDARY : ACTUAL_FILE, buffer2);
         g_print("%s", ACTUAL_FILE);
@@ -381,7 +387,9 @@ void handle_grid_detection(GtkWidget* widget, gpointer data)
 : "GUI/FullDemoImages/grid.png");
     if (WEXITSTATUS(status) == 0)
     {
-        set_text_and_center(ui->text_view, "Succesfully filtered image. \n\nApplied : \n\n - Grayscale\n\n - Contrast\n\n - Median\n\n - Threshold\n\n - Invert", 100);
+        set_text_and_center(ui->text_view, "Succesfully filtered image.
+				\n\nApplied : \n\n - Grayscale\n\n
+				- Contrast\n\n - Median\n\n - Threshold\n\n - Invert", 100);
         g_print("External program executed successfully!\n");
         strcpy(demo ? ACTUAL_FILE_SECONDARY : ACTUAL_FILE, demo ?
 DETECT_RES_PARTIAL : DETECT_RES_FULL);
@@ -476,12 +484,12 @@ void open_explorer(gpointer data)
 }
 
 
-void next_step(GtkWidget *widget, gpointer data) 
+void next_step(GtkWidget *widget, gpointer data)
 {
     g_print("Next step!\n");
 }
 
-void all_step(GtkWidget *widget, gpointer data) 
+void all_step(GtkWidget *widget, gpointer data)
 {
 	UserInterface* ui = data;
 	if (ui->state == END)
@@ -699,7 +707,7 @@ int demo = ui->demo_state == PartialDemo;
     if (WEXITSTATUS(status) == 0)
     {
         set_text_and_center(ui->text_view, "Succesfully modified image.", 100);
-        GdkPixbuf *pixbuf = create_and_set_pixbuf(demo ? 
+        GdkPixbuf *pixbuf = create_and_set_pixbuf(demo ?
 "GUI/PartialDemoImages/gridbefore.png":
 "GUI/FullDemoImages/gridbefore.png", data);
         if (pixbuf == NULL)
@@ -791,7 +799,7 @@ int main(int argc, char *argv[]) {
     scale = GTK_SCALE(gtk_builder_get_object(builder, "rotate_scale"));
     gtk_range_set_range(GTK_RANGE(scale), -360, 360);
     gtk_range_set_increments(GTK_RANGE(scale), 1, 1);
-    g_object_set(scale, "width-request", 200, NULL); 
+    g_object_set(scale, "width-request", 200, NULL);
     GtkWidget* notebook =
 GTK_WIDGET(gtk_builder_get_object(builder, "notebook1"));
     window = GTK_WINDOW(gtk_builder_get_object(builder, "main_window"));
