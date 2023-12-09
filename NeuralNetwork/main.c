@@ -51,7 +51,7 @@ int main(int argc, char **argv)
 				exit_help();
 		}
 
-    size_t num = 233;
+    size_t num = 237;
 		train(epochs, lr, "values", num);
 
 		printf("Neural network successfully trained with parameters: \n");
