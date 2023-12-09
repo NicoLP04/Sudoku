@@ -658,7 +658,7 @@ void next_step_other(GtkWidget* widget, gpointer data)
 	case FILTER:
             ui->state = DETECT_LINES;
 	    char* p = NULL;
-	    if (asprintf(p, "GUI/FullDemoImages/%s", FILTERED_IMAGE) == 0)
+	    if (asprintf(&p, "GUI/FullDemoImages/%s", FILTERED_IMAGE) == 0)
         {
 
         }
@@ -856,24 +856,24 @@ GTK_WIDGET(gtk_builder_get_object(builder, "notebook1"));
 
     gtk_css_provider_load_from_path(provider, "style.css", NULL);
 
-apply_dynamic_style(text_view, provider);
-apply_dynamic_style(text_view_image, provider);
-apply_dynamic_style(window, provider);
+apply_dynamic_style(GTK_WIDGET(text_view), provider);
+apply_dynamic_style(GTK_WIDGET(text_view_image), provider);
+apply_dynamic_style(GTK_WIDGET(window), provider);
 
 
-   apply_dynamic_style(open_button_secondary, provider);
+   apply_dynamic_style(GTK_WIDGET(open_button_secondary), provider);
 
-    apply_dynamic_style(crop_button, provider);
-    apply_dynamic_style(filter_button, provider);
-    apply_dynamic_style(update_button, provider);
-    apply_dynamic_style(file_explorer_button, provider);
-    apply_dynamic_style(next, provider);
-    apply_dynamic_style(rotate_button, provider);
-    apply_dynamic_style(previous, provider);
-    apply_dynamic_style(all_button, provider);
-    apply_dynamic_style(nex_button, provider);
-    apply_dynamic_style(solve_button, provider);
-    apply_dynamic_style(detect_lines_button, provider);
+    apply_dynamic_style(GTK_WIDGET(crop_button), provider);
+    apply_dynamic_style(GTK_WIDGET(filter_button), provider);
+    apply_dynamic_style(GTK_WIDGET(update_button), provider);
+    apply_dynamic_style(GTK_WIDGET(file_explorer_button), provider);
+    apply_dynamic_style(GTK_WIDGET(next), provider);
+    apply_dynamic_style(GTK_WIDGET(rotate_button), provider);
+    apply_dynamic_style(GTK_WIDGET(previous), provider);
+    apply_dynamic_style(GTK_WIDGET(all_button), provider);
+    apply_dynamic_style(GTK_WIDGET(nex_button), provider);
+    apply_dynamic_style(GTK_WIDGET(solve_button), provider);
+    apply_dynamic_style(GTK_WIDGET(detect_lines_button), provider);
 
 
 
