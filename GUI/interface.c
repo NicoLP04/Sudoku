@@ -1,3 +1,5 @@
+#define _GNU_SOURCE
+
 #include <gtk/gtk.h>
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include <stdio.h>
@@ -6,6 +8,7 @@
 #include <unistd.h>
 #include <stddef.h>
 #include <ctype.h>
+
 
 typedef enum State
 {
@@ -550,14 +553,6 @@ GError* error, gpointer user_data) {
 }
 
 
-void apply_dynamic_style(GtkWidget *widget, const gchar *style_name) {
-    gtk_widget_set_name(widget, style_name);
-    GtkStyleContext *context = gtk_widget_get_style_context(widget);
-    gtk_style_context_save(context);
-    gtk_style_context_add_class(context, style_name);
-    gtk_style_context_restore(context);
-}
-
 size_t MATRIX_SIZE = 9;
 
 void writeMatrixToFile(const char* filename) {
@@ -663,7 +658,10 @@ void next_step_other(GtkWidget* widget, gpointer data)
 	case FILTER:
             ui->state = DETECT_LINES;
 	    char* p = NULL;
-	    asprintf(p, "GUI/FullDemoImages/%s", FILTERED_IMAGE);
+	    if (asprintf(p, "GUI/FullDemoImages/%s", FILTERED_IMAGE) == 0)
+        {
+
+        }
 	    pixbuf =
 create_and_set_pixbuf(p, data);
             break;
@@ -716,6 +714,10 @@ int demo = ui->demo_state == PartialDemo;
     }
 }
 
+void apply_dynamic_style(GtkWidget *widget, GtkCssProvider* provider) {
+    GtkStyleContext *context = gtk_widget_get_style_context(widget);
+    gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+}
 
 
 int main(int argc, char *argv[]) {
@@ -847,19 +849,42 @@ GTK_WIDGET(gtk_builder_get_object(builder, "notebook1"));
     g_signal_connect(crop_button, "clicked", G_CALLBACK(solve_button), &ui);
 
 
- /*   GtkCssProvider *provider = gtk_css_provider_new();
+    
+
+
+    GtkCssProvider *provider = gtk_css_provider_new();
+
     gtk_css_provider_load_from_path(provider, "style.css", NULL);
 
+apply_dynamic_style(text_view, provider);
+apply_dynamic_style(text_view_image, provider);
+apply_dynamic_style(window, provider);
 
-    GtkStyleContext *context = gtk_widget_get_style_context((all_button));
+
+   apply_dynamic_style(open_button_secondary, provider);
+
+    apply_dynamic_style(crop_button, provider);
+    apply_dynamic_style(filter_button, provider);
+    apply_dynamic_style(update_button, provider);
+    apply_dynamic_style(file_explorer_button, provider);
+    apply_dynamic_style(next, provider);
+    apply_dynamic_style(rotate_button, provider);
+    apply_dynamic_style(previous, provider);
+    apply_dynamic_style(all_button, provider);
+    apply_dynamic_style(nex_button, provider);
+    apply_dynamic_style(solve_button, provider);
+    apply_dynamic_style(detect_lines_button, provider);
+
+
+
+
+    /*GtkStyleContext *context = gtk_widget_get_style_context((all_button));
     gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-
     context = gtk_widget_get_style_context((nex_button));
     gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
+    context = gtk_widget_get_style_context(GTK_WIDGET(window));
+    gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);*/
 
-    context = gtk_widget_get_style_context(GTK_WIDGET(text_view));
-    gtk_style_context_add_provider(context, GTK_STYLE_PROVIDER(provider), GTK_STYLE_PROVIDER_PRIORITY_APPLICATION);
-*/
 
     GdkPixbuf *pixbuf = create_and_set_pixbuf(filename, &ui);
     g_object_unref(pixbuf);
